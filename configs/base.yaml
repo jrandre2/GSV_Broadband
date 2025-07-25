@@ -1,0 +1,6 @@
+study_zip_list: data/raw/zip_east_264.csv   # will exist after Step 5
+bag_points_per_zip: 50                      # pilot
+headings: [0, 90, 180, 270]
+image_size: 640
+cnn_backbone: efficientnet_b3_21k
+label_source: microsoft_2025q2
