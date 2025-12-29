@@ -1,0 +1,60 @@
+project:
+  type: manuscript
+  output-dir: _output
+
+title: "What Predicts Broadband Usage? A Comparison of Computer Vision and Rural Urban Typology Machine Learning Models"
+author:
+  - name: Jesse Andrews
+    affiliation: Texas Tech University
+    email: jesse.andrews@ttu.edu
+
+abstract: |
+  This study tests whether Google Street View (GSV) imagery improves prediction of broadband
+  usage (estimated percent accessing >=25/3 Mbps) beyond a rural-urban typology across 264 ZIP
+  codes (ZCTAs) in Nebraska. We extract 24 handcrafted OpenCV features from 7,619 GSV images and
+  compare RUCA-only, visual-only, and combined models. On a fixed 80/20 holdout split, tuned
+  RUCA-only models reach test $R^2$ around 0.40, tuned visual-only models reach about 0.37, and
+  combined models do not exceed the RUCA baseline. Spatial cross-validation with nested tuning
+  substantially lowers performance (best RUCA around 0.13; visual and combined near zero or
+  negative), indicating limited geographic generalization. These results suggest that for this
+  region and target, typology provides a strong, low-cost baseline for modeling broadband
+  usage, while imagery adds limited incremental value.
+
+title-block-style: plain
+
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    theme: cosmo
+    css: jip.css
+  pdf:
+    documentclass: article
+    papersize: letter
+    fontsize: 12pt
+    linestretch: 2
+    pdf-engine: xelatex
+    mainfont: "Times New Roman"
+    sansfont: "Times New Roman"
+    geometry:
+      - margin=1in
+    number-sections: true
+    csl: csl/chicago-fullnote-bibliography.csl
+    cite-method: citeproc
+    reference-location: document
+  docx:
+    toc: true
+    number-sections: true
+    reference-doc: jip-reference.docx
+
+bibliography: references.bib
+csl: csl/apa.csl
+
+execute:
+  echo: false
+  warning: false
+  message: false
+
+jupyter: python3

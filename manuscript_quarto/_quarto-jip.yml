@@ -1,0 +1,50 @@
+# Journal of Information Policy Submission Template
+# Usage: quarto render index.qmd --profile jip
+# Or: quarto render jip-template.qmd
+
+project:
+  type: manuscript
+  output-dir: _output/jip
+
+# JIP Requirements:
+# - Times New Roman 12pt, double-spaced
+# - Chicago Manual of Style 18th ed, Notes-Bibliography
+# - Word document format (.docx)
+# - Anonymous version + cover page for peer review
+
+format:
+  docx:
+    reference-doc: jip-reference.docx
+    toc: false
+    number-sections: false
+  pdf:
+    documentclass: article
+    papersize: letter
+    fontsize: 12pt
+    linestretch: 2
+    pdf-engine: xelatex
+    mainfont: "Times New Roman"
+    geometry:
+      - margin=1in
+    number-sections: false
+
+# Citation: Chicago Notes-Bibliography (NOT Author-Date)
+# Uses footnotes for citations, full bibliography at end
+bibliography: references.bib
+csl: csl/chicago-fullnote-bibliography.csl
+cite-method: citeproc
+
+# Put citations in footnotes (Chicago Notes style)
+reference-location: document
+
+# Execution settings
+execute:
+  echo: false
+  warning: false
+  message: false
+
+# Figure settings for JIP
+# Note: Figures should be submitted as separate files
+# This config embeds them for review copy
+fig-format: png
+fig-dpi: 300

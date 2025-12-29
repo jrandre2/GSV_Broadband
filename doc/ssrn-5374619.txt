@@ -1,0 +1,521 @@
+What Predicts Broadband Usage? A Comparison of Computer Vision and Rural
+Urban Typology Machine Learning Models
+Abstract
+This study compares the predictive power of Google Street View (GSV) imagery against simple
+geographic typologies for modeling broadband usage across 264 ZIP codes in eastern Nebraska.
+We analyzed 7,600 GSV images using feature engineering and deep learning, evaluating their
+performance against models based on Rural-Urban Commuting Area (RUCA) codes.
+Our analysis revealed a large performance gap. Visual features from the built environment
+explained almost no variance in broadband usage (R2~=0.025). In contrast, a location's RUCA
+code, when analyzed with non-linear ensemble models, proved to be a strong predictor
+(R2~=0.39). We conclude with a principle of efficiency: for visually homogeneous regions, the
+most resource-efficient path to guiding broadband investment is to first unlock the rich, non-
+linear information within existing geographic data.
+1. Introduction
+With tens of billions of dollars allocated to close the U.S. digital divide, the need for cost-
+effective methods to identify and prioritize underserved communities has never been more
+critical. The factors driving broadband adoption vary significantly with geography, demanding
+place-based methods that can accurately guide investment from dense urban cores to sparse rural
+landscapes. To develop effective policy, researchers must understand which data sources provide
+the most reliable signals for these different environments.
+Recent methodological advances in machine learning and street imagery offer promising tools to
+reassess broadband access with reduced time and resources. In particular, the integration of
+street-level imagery and machine learning may present a new opportunity to model and predict
+infrastructure gaps with improved accuracy to more accurately direct financial resources. These
+innovations shift the focus from retrospective analysis to predictive frameworks that could
+inform more efficient and equitable infrastructure deployment.
+This pilot study implements a method to study broadband inequality that is taken from adjacent
+geographical work. This adjacent work leverages computer vision and statistical modeling to
+attempt to model and predict local-level broadband needs. Central to this inquiry is the viability
+of various demographic, socio-economic, and visual indicators in forecasting infrastructure
+presence and accessibility. By evaluating which variables and analytic approaches serve as the
+most robust predictors, this study aims to contribute to a data-informed framework for
+identifying underserved communities and informing future broadband policy infrastructure
+investments.
+2. Literature Review
+2.1 Introduction
+Reliable broadband access remains uneven across the United States, with rural areas persistently
+lagging suburban and urban counterparts despite decades of public investment and regulatory
+Electronic copy available at: https://ssrn.com/abstract=5374619
+reform (Ali, 2021; Strover, 2019). Early explanations centered on infrastructure scarcity, but
+contemporary scholarship frames the "rural digital divide" as an interaction among geography,
+market incentives, socio economic context, and policy design (Hollman et al., 2024a, 2024b).
+This review captures major theoretical and methodological advances while incorporating recent
+work on street level imagery and machine learning.
+2.2 Policy and Funding Landscape
+2.2.1 Federal Funding Mechanisms and Constraints
+The Universal Service Fund (USF) and related high-cost programs have long been the principal
+federal tools for equalizing rural and urban service costs (Ali, 2021). Yet analysts argue that the
+USF's assessment base is shrinking even as its obligations grow, raising concerns about long run
+sustainability (Mejia, 2024; Glass & Tardiff, 2021). Ongoing litigation over the program's
+constitutionality further clouds the funding outlook (Class et al., 2024). Other infrastructure
+funding mechanisms at state and federal levels abound. Broadband Equity, Access, and
+Deployment (BEAD), Affordable Connectivity Program (ACP), USDA Community Connect
+grants, and the Farm Bill, and ReConnect programs have all sought to expand broadband
+infrastructure and increase broadband speeds in underserved and rural areas. Researchers have
+found that these programs appear to have a positive effect on the availability of broadband in
+rural areas, which has many economic implications (Deller et al., 2022; Whitacre et al., 2014).
+Whitacre and Gallardo (2020) find that states with dedicated broadband offices and permissive
+rules for cooperative or municipal networks achieve significantly higher fiber and 25/3 Mbps
+standardized broadband speed coverage than states restricting such models. However, Kandilov
+et al. (2017) noted that the positive impacts of broadband programs are often seen in counties
+adjacent to metropolitan areas, including higher-speed internet; in non-adjacent areas, there is no
+positive impact. Goldstein & Pender (2025) suggest that the USDA Community Connect
+broadband program increased upload speed, but not download in rural areas. Furthermore,
+Pender et al. (2023) showed Community Connect and ReConnect programs had significant
+disparities in access among different racial and ethnic groups. The programs' approved service
+areas had demographics which were "less educated, poorer, and older" compared not approved
+service areas.
+With the ACP ending on June 1, 2024, and a new Federal Communications Commission Chair
+appointed, broadband policy may shift and form in a different direction (Benton Institute, 2024).
+If broadband funding continues to dwindle, rural areas may be burdened with more regulation
+costs as studies show that regulatory cost recovery can disproportionately burden sparsely
+populated exchanges (Obermier & Hollman, 2020). Financial modeling indicates that stand alone
+rural broadband cooperatives would need to charge upward of 130 percent of prevailing market
+prices absent operating support (Schmit & Severson, 2021). States that ban or impede such
+cooperative or municipal models thereby restrict potentially viable pathways to serve remote
+areas (Whitacre & Gallardo, 2020). ACSE (2025) estimates that the private sector has spent $2.2
+trillion with federal funding recently providing an additional $65 billion with the Infrastructure
+Investment and Jobs Act (IIJA). This reinforces the need for granular cost modeling so that
+federal and private funding dollars are directed to infrastructure efficiently and effectively.
+2.2.2 Rural Disparities in Current Broadband Mapping Systems
+Effective policymaking depends on accurate coverage data, yet the Federal Communications
+Commission (FCC) historically collected information at census block granularity, a resolution
+Electronic copy available at: https://ssrn.com/abstract=5374619
+that systematically overestimates rural availability (Grubesic & Mack, 2015). Consumer reported
+speed tests continue to expose mismatches between official maps and on the ground performance
+(Hollman et al., 2024a; Ookla, 2021). Crowdsourced datasets must be interpreted with caution
+because low-income households, which are often in remote areas, are underrepresented (Saxon &
+Black, 2022). American Community Survey (ACS) Estimates report an adoption gap with only
+87 percent of rural households having a broadband subscription compared to 91 percent of urban
+households (Mejia, 2024) while ASCE (2025) says that 95 percent of consumers have access to a
+fixed broadband technology. Recent research continues to highlight limitations in official
+mapping systems and offer additional solutions. For example, Major et al. (2020) reverse
+engineered Internet service provider (ISP) availability checkers and submitted more than 19
+million address queries across nine states. Their dataset shows that FCC broadband maps
+significantly overstate availability and speeds, particularly in rural and minority communities,
+and demonstrates that automated address queries can produce more accurate coverage maps.
+To create quality broadband maps, geographic information systems (GIS) are employed. These
+systems take different data and attempt to represent this data, spatially. To do so, spatial areas
+must be defined as rural or urban. However, there are many nuances in rural areas. In sparsely
+rural areas, there may be a population of less than 250 people in 100 square miles. While in other
+types of rural areas, there are 50,000 people within 100 square miles. Treating "rural" as a single
+category masks substantial variation in settlement pattern, terrain, and socio-economics (Strover,
+2019; Hollman et al. 2024a). To reclassify rural areas in multiple zones, Hossain et al. (2024)
+combined demographic layers with network data to designate priority zones for broadband
+expansion. Kostelnick et al. (2024) fused LiDAR1, crop yield and parcel datasets to locate both
+unserved high value cropland and nearby "vertical assets" (e.g., silos, water towers) suitable for
+fixed wireless antennas. In the rural areas, broadband is needed not only for consumer-based
+internet, but also for precision agriculture (Kim & Paudel, 2025).
+2.3 Emerging Methodological Innovations
+2.3.1 Computer Vision and Street Imagery for Infrastructure Assessment
+A critical barrier to rural deployment is the lack of detailed broadband infrastructure inventories.
+Although service providers self-report their current infrastructure for FCC Broadband Data
+Collection, the provider can report on future infrastructure that is not currently deployed.
+Computer vision (CV) methods may offer a remedy. Krell et al. (2023) leveraged convolutional
+neural networks (CNNs) and satellite imagery to detect cell tower footprints with more than 80
+percent precision. This automated the mapping of cell tower structures and the subsequent
+broadband cell coverage. Structural civil engineering research models the value of CV for
+identifying poles, cables and other linear assets, which are otherwise prone to human inventory
+errors (Koch et al., 2015; Chow et al., 2020). Amini (2024) also explored CV and deep learning
+to engineer and optimize fixed wireless placement of equipment to provide broadband access in
+mountainous terrain. Since both fixed and wireless broadband access require visible, physical
+infrastructure, CV could present a feasible method for mapping broadband infrastructure.
+Recent work extends CV to ground level imagery. In 2017, Gebru et al. collected 50 million
+Google Street View images across 200 U.S. cities and used CNNs to identify the make and
+model of 22 million automobiles. When aggregated, these detections allowed them to estimate
+1 a remote sensing method that creates 3D models of objects in the environment
+Electronic copy available at: https://ssrn.com/abstract=5374619
+income, race, and voting patterns at precinct level granularity. Liu et al. (2017) introduced a
+place centric multi-instance regression framework that treats each location as a "bag" of street
+view photos and uses a deep CNN with an expectation maximization algorithm to predict safety
+scores derived from crime records. Their method shows how variable length sets of images can
+be mapped to continuous socioeconomic labels. Public health researchers have processed more
+than 31 million street view images to detect built environment features such as crosswalks,
+housing types, single lane roads and visible utility wires for 2,916 U.S. counties; these indicators
+were then linked to obesity, physical inactivity and self-rated health outcomes (Nguyen et al.,
+2021). Although street view imagery can offer rich detail for specific places, Egli et al. (2019)
+points out that certain street views can be blurry making object identification less reliable. Time-
+based scenic and signage items that are in constant change can also make analyses of specific
+behavior phenomena less dependable. Fan et al. (2025) propose an indicator framework to assess
+the completeness of the image to continue to eliminate bias when using street imagery datasets.
+In this pilot dataset, Fan et al. (2025) found that only 62.4 percent of the buildings in London
+were represented in street view imagery and only 12.4 percent of the building facade. They also
+cautioned against using imagery for environmental elements.
+2.3.2 Integrating Social Science Data with Quantitative Results
+To understand the complex interactions of placement of broadband infrastructure and customer
+needs, integrating broadband quantitative metrics, socio economic indicators, and behavioral
+data could be the next step. Frameworks for multimodal machine learning (Baltrusaitis et al.,
+2018) enable fusion of visual, textual, and numerical modalities. Saxon and Black (2022) merge
+crowdsourced speed tests with income data, while Agarwal and Canfield (2024) embed the
+Theory of Planned Behavior in an agent-based model that reveals price elastic tipping points for
+broadband subscriptions in rural Missouri. The recent advances in CV on street view imagery
+could provide additional modalities to produce a new method for examining broadband including
+combining image derived indicators with broadband metrics, demographic, and behavioral
+datasets to predict broadband use or to predict placement of new broadband infrastructure.
+Attention based multiple instance models, such as the place centric approach of Liu et al. (2017),
+demonstrate how unordered sets of images can be aggregated to a single label, an architecture
+that is directly applicable to predicting broadband availability from multiple street view frames.
+2.4 Exploring a New Method of Broadband Measurement
+This recent scholarship points us towards the purpose of this paper. Rural broadband availability
+and infrastructure lags behind urban counterparts despite the quantity of federal funding.
+Although methods exist to measure rural broadband, these methods consume a lot of time and
+monetary resources. Many typologies of rural also exist that are hard to distinguish in current
+policy and research. CV and street imagery techniques offer an alternative method to predict
+broadband availability in rural areas, which needs to be explored. This pilot study attempts to
+explore the viability of various demographic, socio-economic, and visual indicators in
+forecasting broadband infrastructure presence and accessibility. By evaluating which variables
+and analytic approaches serve as the most robust predictors, this study aims to contribute to a
+data-informed framework for identifying underserved communities and informing future
+broadband policy infrastructure investments.
+3. Data and Methods
+Electronic copy available at: https://ssrn.com/abstract=5374619
+Our study integrates multiple data sources to predict broadband usage across 264 ZIP Code
+Tabulation Areas (ZCTAs) in Nebraska, an area selected to represent a mix of urban, suburban,
+and rural environments. The methodology is defined by our input features, the target variable
+used for model training, and our evaluation framework.
+3.1 Input Features
+3.1.1 Google Street View Imagery and Sampling
+To create a representative visual dataset, we implemented a systematic sampling and collection
+protocol using Google Street View (GSV) imagery. Our process began by identifying valid
+building locations within our study area using the Google Buildings Footprint dataset.
+From this geographic index, we developed a script to randomly sample an initial manifest of 500
+structures per ZIP Code, constraining our selection to buildings between 100 and 1000 m2 to
+exclude anomalous structures like small sheds or large industrial complexes. Using this manifest,
+the script systematically queried the Google Street View Static API for each location, filtering all
+requests to retrieve only imagery captured within the last decade. For each building with
+available imagery, the script downloaded a complete set of four images corresponding to the
+cardinal directions, proceeding through the manifest until a full sample was collected for the ZIP
+code.
+This method proved effective. We successfully collected a final dataset of 7,619 images,
+achieving coverage for 261 of the 264 target ZIP codes (98.9%). The protocol's robustness
+ensured that every sampled location with GSV availability is represented by a consistent four-
+image set, forming the foundation for our visual feature extraction.
+3.1.2 Rural-Urban Typology Data
+We used Rural-Urban Commuting Area (RUCA) codes as a proxy for the relative level of
+development. RUCA codes classify U.S. census tracts using measures of population density,
+urbanization, and daily commuting patterns. This provides a standardized and widely used proxy
+for the urban or rural character of a location. We used ZIP disaggregation RUCA codes provided
+by the U.S. Department of Agriculture. (2020). Each ZIP code in our dataset was assigned its
+corresponding primary and secondary RUCA codes to serve as the core geographic features.
+However, the models all use only RUCA1, the primary codes, as we found RUCA2 codes to
+added little to model efficiency.
+3.1.3 Visual Feature Engineering
+To translate the visual characteristics of the built environment into quantifiable data, we adopted
+a hybrid approach that combined traditional computer vision techniques with pre-trained deep
+learning models. This process, implemented using the Python library OpenCV, systematically
+extracted a rich set of metrics from each image.
+Our feature engineering began with established methods for capturing specific visual elements.
+To quantify texture and local patterns in building materials and landscapes, we employed a suite
+of key point detectors including SIFT, ORB, AKAZE, and BRISK. The geometric regularity of
+larger structures was assessed using Histogram of Oriented Gradients (HOG), while Haar
+Electronic copy available at: https://ssrn.com/abstract=5374619
+Cascades were used to detect the presence of specific infrastructural objects. These traditional
+methods provided a granular inventory of the physical components within each scene.
+In addition to these hand-crafted features, we leveraged a pre-trained MobileNet convolutional
+neural network to capture a more holistic representation of the scene. This deep learning model
+converted each image into a dense feature vector, or embedding, which represents complex
+visual patterns tied to the overall socioeconomic context that are otherwise difficult to define
+manually. This process was supplemented by calculating standard color metrics, such as color
+diversity histograms and average saturation, to quantify the material composition of the
+environment.
+After this comprehensive feature set was calculated for every image, the data was aggregated
+first to the building level and then to the ZCTA level. By taking statistical summaries such as the
+mean and variance of the feature values across all images in each area, we produced a final,
+interpretable feature vector for each location to be used in our predictive models.
+3.2 Target Variable: Broadband Usage Data
+To serve as the ground truth for our predictive models, we utilized the "U.S. Broadband Usage
+Percentages" dataset from Microsoft Research. This publicly available dataset provides estimates
+of broadband usage and availability at the ZIP code level across the United States, derived from
+Microsoft's service and application telemetry. For our study, the specific target variable was the
+estimated percentage of the population within each ZIP code accessing the internet at or above
+standard broadband speed tiers (25/3 Mbps). This continuous variable served as the label that our
+machine learning models were trained to predict.
+3.3 Modeling and Evaluation
+To test the relative predictive power of visual versus geographic features, we developed and
+evaluated several types of models. Our methodology included two classes of models: simple
+regression models using only RUCA codes to establish a non-visual performance baseline; tree-
+based ensemble models (including Extra Trees, Random Forest, and Gradient Boosting) that
+integrate both hand-crafted visual features and the RUCA codes.
+Model performance was evaluated using a suite of metrics to ensure a comprehensive
+assessment. The primary metric was the coefficient of determination (R2), used to quantify the
+proportion of variance in broadband usage explained by each model. To measure the magnitude
+of prediction errors, we also calculated the Root Mean Squared Error (RMSE) and Mean
+Absolute Error (MAE). To ensure the robustness of our results and prevent data leakage between
+geographically proximate areas, we employed a group-based cross-validation strategy. This
+approach keeps all images from a given ZIP code within the same fold, ensuring that the training
+and testing sets remained geographically independent during model evaluation.
+4. Results
+Our analysis systematically evaluated multiple modeling architectures to predict broadband
+usage, revealing a clear and consistent performance hierarchy. The findings demonstrate that
+while visual features derived from Google Street View offer minimal predictive value, a simple
+rural-urban typology contains a strong predictive signal, particularly when analyzed with non-
+linear models.
+Electronic copy available at: https://ssrn.com/abstract=5374619
+4.1 Overall Model Performance
+A comparison of all modeling approaches establishes the Extra Trees Regressor as the champion
+model, achieving an R2 value of 0.41. As summarized in Table 1, tree-based ensemble methods
+that integrated both geographic and visual data consistently outperformed all other model types.
+Traditional linear models struggled with the data's complexity, and deep learning approaches
+applied directly to image pixels failed to extract a meaningful signal in this data-constrained
+environment.
+Table 1: Overall Model Performance Hierarchy
+Model Type A r c hitecture F i n a l R 2 Score
+Extra Trees E n semble + 0.41
+Engineered
+Features
+Gradient Ensemble + 0.36
+Boosting Engineered
+Features
+Random Forest E n s e mble + 0.33
+Engineered
+Features
+RUCA Baseline Typology 0.39
+(Ensemble) Features Only
+RUCA Baseline Typology 0.14
+(Linear) Features Only
+ElasticNet L i near (All 0.25
+Features)
+4.2 The Predictive Power of Rural-Urban Typology
+A important finding emerges from analyzing the Rural-Urban Commuting Area (RUCA) codes
+in isolation. A standard linear regression using only RUCA features achieved a modest R2 of
+0.14. However, ensemble models unlocked significantly more predictive power from the exact
+same data, achieving an R2 of approximately 0.39 (Table 2). This 25-point increase
+in R2 indicates that the relationship between a location's rural character and its broadband usage
+is highly non-linear and involves complex interactions that linear models cannot capture. Further
+analysis revealed that the primary RUCA code (RUCA1) contained nearly all this predictive
+signal.
+Table 2: Performance of Rural-Urban Typology Features (RUCA) by Model Type
+Feature Linear Extra Random Gradient
+Configuration Regression Trees R2 Forest R2 Boosting
+R2 R2
+RUCA1 only 0 . 1 4 4 0 . 392 0.391 0.392
+RUCA1 + 0.132 0 . 373 0.371 0.375
+RUCA2
+Electronic copy available at: https://ssrn.com/abstract=5374619
+4.3 The Limited Contribution of Visual Features
+In contrast to the typology data, models relying solely on visual features performed poorly.
+These models consistently failed to explain more than 3% of the variance in broadband usage,
+achieving a negligible R2 of approximately 0.025. This result indicates that for this specific task,
+region, and sample, the visual information from Google Street View provided little independent
+predictive signal.
+4.4 Deconstructing the Champion Model
+The top-performing model, an Extra Trees Regressor with a final R2 of 0.41, was driven by its
+ability to interpret the urban-rural typology data, not by a synergistic combination of features. A
+detailed performance attribution analysis (Table 3) shows that the non-linear patterns within the
+RUCA data alone accounted for nearly 60% of the model's total predictive power. The entire set
+of hand-crafted visual features provided only a marginal 0.02 boost to the final R2 score, while
+interaction effects between the feature sets were negligible.
+Table 3: Validated Performance Attribution for Extra Trees Model (R2 = 0.41)
+Component C o n t r i b u t i o n Percentage Source
+(R2) of Total
+RUCA 0.14 34.1% Baseline
+Typology linear signal
+Features from
+(Linear) typology
+data.
+Extra Trees 0.24 58.5% Performance
+Non-Linear gain from
+RUCA Boost capturing
+non-
+linearities.
+Visual 0.02 4.9% Minor, direct
+Features contribution
+from visual
+data.
+Feature 0.01 2.4% Negligible
+Interaction synergistic
+Effects effects.
+Total Extra 0.41 100%
+Trees
+Performance
+4.5 Model Validation and Robustness
+To ensure reliability, all models were validated using a group-based cross-validation strategy that
+prevented data leakage between geographically proximate ZIP codes. As detailed in Table 4, the
+top-performing ensemble models demonstrated high stability, with cross-validation scores
+closely matching the final holdout scores. This consistency between performance on training
+Electronic copy available at: https://ssrn.com/abstract=5374619
+folds and on unseen data confirms a low risk of overfitting and indicates the reported metrics are
+robust estimates of the models' true predictive power.
+Table 4: Validation Robustness Comparison
+Model Type C r oss- Holdout R2 Stability
+Validation
+R2
+Extra Trees + 0.38 +/- 0.41 High
+Features 0.05
+Random Forest + 0.31 +/- 0.33 High
+Features 0.04
+Gradient 0.29 +/- 0.36 Medium
+Boosting + 0.08
+Features
+5. Discussion & Conclusion
+This study's findings offer a clear and compelling insight into modeling strategy for digital divide
+research. The primary driver of predictive success in our models was not the sophisticated fusion
+of multiple data modalities, but rather the application of an appropriate non-linear algorithm to a
+simple, yet powerful, geographic typology. The Rural-Urban Commuting Area (RUCA) data
+contained the foundational predictive signal, but its full potential-explaining nearly 40% of the
+variance in broadband usage-was only realized when processed by an ensemble model like the
+Extra Trees Regressor. The algorithm's ability to capture the complex, non-linear relationships
+and threshold effects within the typology data alone accounted for most of the model's
+performance.
+Inefficacy of Street-Level Visual Data
+We found minimal predictive power of the Google Street View imagery for a relatively small but
+geographically diverse dataset of 7,600 images and the application of both hand-crafted feature
+engineering and deep learning, the visual data in isolation had almost no value (R2~=0.025).
+When added to the top-performing model, these features provided only a marginal, additive
+boost of 0.02 to the final R2 score, with negligible interaction effects. This compels the question:
+why did this intuitively rich data source fail? We speculate that the reasons are rooted in the
+specific geographic and social context of our study area.
+The core assumption that visual cues of the built environment are strong proxies for
+socioeconomic status and infrastructure quality appears to break down in the geographical region
+of Eastern Nebraska. The primary reason is likely visual homogeneity, particularly in residential
+architecture. Unlike dense, historically layered urban centers where housing facades and square
+footage can vary dramatically with income, the visual character of homes in Nebraska's
+suburban, exurban, and rural areas is often quite similar. A modern, well-maintained home in a
+rural ZIP code with limited broadband options may be visually indistinguishable from a nearly
+Electronic copy available at: https://ssrn.com/abstract=5374619
+identical home in a suburban development with ubiquitous fiber access. The visual cues of
+affluence or upkeep do not map cleanly onto the urban-rural infrastructure gradient that defines
+broadband availability. Consequently, the model could not learn a consistent relationship
+between the appearance of a building and the quality of its digital connection. The success of
+similar methods in other contexts, such as estimating demographics from automobiles in diverse
+cities (Gebru et al., 2017), relies on visual indicators that are strongly correlated with the target
+variable. In our case, the link is weaker. Furthermore, while our hand-crafted features were
+designed to detect infrastructure like utility poles, the mere presence of a pole is not a
+differentiator; it fails to distinguish between poles carrying legacy copper lines and those
+carrying modern fiber optic cables. These critical differences are often invisible or too subtle for
+a computer vision model to detect reliably from street-level imagery. Finally, while 7,600 images
+is a substantial number, it averages to less than 30 images per ZIP code, a level of data scarcity
+that may have been insufficient for a data-hungry CNN to learn meaningful patterns amidst the
+visual noise.
+Powerful Future Model
+Although this learning model did not fully work as intended, the implications for future usage
+need to be explored. Since the breakdown occurred within the inability to differentiate between
+copper and fiber lines, perhaps the telecommunications providers could provide a differentiation
+that would also enable better visual inventory inspection for civil engineers, similar to that done
+for concrete structures/barriers and metal infrastructure. With small enhancements in the physical
+environment, this model has the potential to predict future infrastructure that could enable
+effective and efficient decision making by any policy maker, without needing to understand the
+nuances of the technical, telecommunications environment.
+Implications for Future Research
+Even though the modeling did not fully predict as intended in this instance, this work offers a
+clear, strategic path for future research. The primary lesson is that investigators should first seek
+to maximize the predictive power of foundational, readily available datasets like geographic
+typologies through the application of non-linear ensemble methods. This approach is
+computationally and cost efficient and, as we have shown, can yield surprisingly strong results.
+Only after exhausting the potential of such data should researchers consider incorporating more
+complex and computationally expensive sources. However, our findings suggest a change in
+focus may be warranted. Instead of street-level imagery, satellite or aerial imagery may prove
+more effective. Satellite data captures a different class of features-such as land use patterns,
+building density, vegetation cover, and the layout of transportation networks-that may correlate
+more strongly with the rural-urban spectrum and, by extension, infrastructure deployment
+patterns. Analyzing the broader spatial environment of a location, rather than the facade of its
+buildings, is likely a more robust method for differentiating between areas in a visually
+homogeneous region like Nebraska.
+Electronic copy available at: https://ssrn.com/abstract=5374619
+In conclusion, our study serves as a valuable case study in modeling strategy. It demonstrates
+that the choice of model architecture and its ability to unlock non-linearities in existing data can
+be more important than simply adding more data modalities. The value of visual data is highly
+context-dependent, and its failure in this instance provides a crucial insight: the assumptions that
+underpin successful machine learning applications in one environment cannot be transferred to
+another without critical evaluation. By prioritizing nonlinear analysis of foundational data,
+researchers can build strong, efficient, and highly predictive models to help bridge the digital
+divide.
+6. References
+Agarwal, A., & Canfield, C. (2024). Analysis of rural broadband adoption dynamics: A theory
+driven agent based model. PLOS ONE, 19(6), e0302146.
+Ali, C. (2021). Farm Fresh Broadband: The Politics of Rural Connectivity. MIT Press.
+American Consumer Institute. (2024). Universal Service Fund: The bad, good, and optimal.
+https://www.theamericanconsumer.org/wp-content/uploads/2024/06/Universal-Service-Fund-
+The-Bad-Good-and-Optimal.pdf
+ASCE (American Society of Civil Engineers). (2025). 2025 Infrastructure Report Card. ASCE.
+https://infrastructurereportcard.org/wp-content/uploads/2025/03/Broadband.pdf
+Amini, M. (2024). Enhancing 5G Fixed Wireless Access in Rural Settings via Machine Learning-
+Driven Resource Optimization. West Virginia University.
+Baltrusaitis, T., Ahuja, C., & Morency, L. P. (2018). Multimodal machine learning: A survey and
+taxonomy. IEEE Transactions on Pattern Analysis and Machine Intelligence, 41(2), 423-443.
+Benton Institute for Broadband & Society. (2024). Project 2025: Brendan Carr's Agenda for the
+FCC. Benton Institute Weekly Digest. https://www.benton.org/blog/project-2025-brendan-carrs-
+agenda-fcc
+Class, E., Holland, D., Johnson, T.M., Rupy, K.G., Turner, J.S., & Rigizadeh, S. (2025). Supreme
+Court Declares Universal Service Fund Constitutional, Reversing Fifth Circuit Opinion.
+https://www.wiley.law/alert-Supreme-Court-Declares-Universal-Service-Fund-Constitutional-
+Reversing-Fifth-Circuit-Opinion
+Deller, S., Whitacre, B., & Conroy, T. (2022). Rural broadband speeds and business startup
+rates. American Journal of Agricultural Economics, 104(3), 999-1025.
+Electronic copy available at: https://ssrn.com/abstract=5374619
+Egli, V., Zinn, C., Mackay, L., Donnellan, N., Villanueva, K., Mavoa, S., ... & Smith, M. (2019).
+Viewing obesogenic advertising in children's neighbourhoods using Google Street View.
+Geographical Research, 57(1), 84-97.
+Fan, Z., Feng, C. C., & Biljecki, F. (2025). Coverage and bias of street view imagery in mapping
+the urban environment. Computers, Environment and Urban Systems, 117, 102253.
+Gebru, T., Krause, J., Wang, Y., Chen, D., Deng, J., Aiden, E. L., & Fei-Fei, L. (2017). Using
+deep learning and Google Street View to estimate the demographic makeup of neighborhoods
+across the United States. Proceedings of the National Academy of Sciences, 114(50), 13108-
+13113.
+Glass, V., & Tardiff, T. (2021). Reforming funding of universal access to telecommunications
+and broadband services: Approaches for the new decade. Telecommunications Policy, 45(2),
+102037.
+Goldstein, J., & Pender, J. (2025). Impacts of the USDA Community Connect broadband
+program on broadband speeds in rural areas. Telecommunications Policy, 49(4), 102930.
+Grubesic, T. H., & Mack, E. A. (2015). Spatially explicit approaches to national broadband
+planning. Telecommunications Policy, 39(5), 329-342.
+Hollman, A. K., Obermier, T. R., & Burger, P. R. (2021). Rural measures: A quantitative study of
+the rural digital divide. Journal of Information Policy, 11, 176-201.
+Hollman, A. K., Obermier, T. R., & Andrews, J. R. (2024a). A hard look at quality and policy
+from the lens of the rural internet consumer. Telecommunications Policy, 48(6), 102762.
+Hollman, A. K., Obermier, T. R., & Andrews, J. R. (2024b). Rural broadband usage: Analysing
+satisfaction and internet speed. Rural Society, 33(1), 19-32.
+Hossain, M. A., Mou, F. T., & Akter, S. (2024). A GIS based approach for identifying priority
+zones for rural broadband expansion. Journal of Rural Studies, 105, 103192.
+Kandilov, A. M., Kandilov, I. T., Liu, X., & Renkow, M. (2017). The impact of broadband on US
+agriculture: an evaluation of the USDA broadband loan program. Applied Economic Perspectives
+and Policy, 39(4), 635-661.
+Kim, M., & Paudel, J. (2025). Bridging the rural divide: The impact of broadband grants on U.S.
+agriculture. European Review of Agricultural Economics, 52(2), 273-300.
+Electronic copy available at: https://ssrn.com/abstract=5374619
+Koch, C., Georgieva, K., Kasireddy, V., Akinci, B., & Fieguth, P. (2015). A review on computer
+vision based defect detection and condition assessment of concrete and asphalt civil
+infrastructure. Advanced engineering informatics, 29(2), 196-210.
+Kostelnick, J. C., Thayn, J. B., & Sinha, K. (2024). Mapping and spatial analysis to expand rural
+broadband access. Papers in Applied Geography, 10(1), 1-20.
+Krell, N., Gleave, S., Nakada, D., Downes, J., & Willett, A. (2023). Enabling decision support
+systems through automated cell tower detection. In Proceedings of 37th Conference on Neural
+Information Processing Systems (NeurIPS 2023).
+Liu, X., Chen, Q., Zhu, L., Xu, Y., Lin, L., & others. (2017). Place centric visual urban
+perception with deep multi instance regression. In Proceedings of the ACM International
+Conference on Multimedia (MM'17) (pp. 23-27), Mountain View, CA.
+Major, D., Teixeira, R., & Mayer, J. (2020, October). No WAN's land: Mapping US broadband
+coverage with millions of address queries to ISPs. In Proceedings of the ACM internet
+measurement conference (pp. 393-419).
+Mejia, D. (2024). Computer and Internet Use in the United States: 2021. American Community
+Survey Reports. Report No. ACS-56.
+https://www2.census.gov/library/publications/2024/demo/acs-56.pdf
+Nguyen, Q. C., Keralis, J. M., Dwivedi, P., Ng, A. E., Javanmardi, M., Khanna, S., ... &
+Tasdizen, T. (2021). Leveraging 31 million Google street view images to characterize built
+environments and examine county health outcomes. Public Health Reports, 136(2), 201-211.
+Obermier, T. R., & Hollman, A. K. (2020). Economic impact of National Exchange Carrier
+Association tariffs on internet access cost in rural areas. Mountain Plains Journal of Business
+and Technology, 21(2), 1-16.
+Ookla. (2021). How Regulators Can Use Crowdsourced Data to Target Rural Connectivity
+Initiatives.
+Pender, J., Goldstein, J., Mahoney-Nair, D., & Charankevich, H. (2023). Three USDA rural
+broadband programs: areas and populations served (Report No. EIB-258). U.S. Department
+of Agriculture, Economic Research Service. https://www.ers.usda.gov/publications/pub-
+details?pubid=107574
+Electronic copy available at: https://ssrn.com/abstract=5374619
+Saxon, J., & Black, D. (2022). What we can learn from selected, unmatched data: Measuring
+internet inequality in Chicago. Computers, Environment and Urban Systems, 98, 101874.
+Schmit, T. M., & Severson, R. M. (2021). Exploring the feasibility of rural broadband
+cooperatives in the United States: The New New Deal? Telecommunications
+Policy, 45(4), 102114.
+Strover, S. (2019). The U.S. digital divide: A call for a new philosophy. Journal of Information
+Policy, 9, 275-300.
+U.S. Department of Agriculture. (2020). 2010 RuralUrban Commuting Area codes - ZIPcode
+file (updated August 17, 2020). ERS Rural Economy and Population Program
+Whitacre, B., Gallardo, R., & Strover, S. (2014). Broadband's contribution to economic
+growth in rural areas: Moving towards a causal relationship. Telecommunications Policy,
+38(11), 1011-1023. https://doi.org/10.1016/j.telpol.2014.05.005
+Whitacre, B., & Gallardo, R. (2020). State broadband policy: Impacts on availability.
+Telecommunications Policy, 44(9), 102025.
+Electronic copy available at: https://ssrn.com/abstract=5374619

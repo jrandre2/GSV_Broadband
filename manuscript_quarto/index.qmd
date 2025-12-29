@@ -1,0 +1,301 @@
+---
+title: "Predicting Broadband Usage: A Comparison of Computer Vision and Rural-Urban Typology Machine Learning Models"
+nocite: |
+  @*
+---
+
+## Abstract {.unnumbered}
+
+With tens of billions in federal broadband funding at stake, cost-effective methods for identifying underserved communities are critical. We evaluate whether street-level imagery can predict broadband usage---the estimated share of residents using 25/3 Mbps or above---across 264 ZIP Code Tabulation Areas (ZCTAs) in eastern Nebraska. Using spatial cross-validation to prevent data leakage from geographic autocorrelation, we compare Rural-Urban Commuting Area (RUCA) typology, 24 OpenCV visual features, American Community Survey (ACS) socioeconomic indicators, and combined models. Under contiguity-based spatial CV---the most conservative evaluation---all models show negative R² values, indicating limited geographic generalization: RUCA categorical (-0.28 ± 0.19), ACS socioeconomic features (-0.15 ± 0.27), and visual features (-0.51 ± 0.57). Under longitude-band spatial CV, which aligns with Nebraska's east-west urban-rural gradient, RUCA achieves positive R² (0.22 ± 0.16). The choice of spatial CV scheme substantially affects conclusions; we recommend reporting multiple schemes. On a fixed holdout split that ignores spatial structure, RUCA one-hot encoding achieves R² = 0.40, outperforming visual features at R² = 0.37. Combined models do not improve upon RUCA alone. These results suggest RUCA typology remains the most reliable "cheap baseline" for broadband prediction, while visual features offer limited incremental value in this visually homogeneous region. Within the study region, RUCA typology provides a useful screening signal (R² = 0.40), but cross-regional generalization is limited: policy-relevant metrics under spatial CV show essentially random ranking performance (Spearman ρ = -0.19, Precision@20% = 0.19).
+
+**Keywords:** broadband; computer vision; machine learning; rural-urban typology; spatial cross-validation
+
+# Introduction
+
+With tens of billions of dollars allocated to close the U.S. digital divide, cost-effective methods for identifying and prioritizing underserved communities are increasingly important. The drivers of broadband adoption vary by geography, so place-based methods are needed to guide investment from dense urban cores to sparse rural areas. Policymakers and researchers therefore need to know which data sources provide the most reliable signals across these environments. Recent advances in machine learning and street imagery offer faster, lower-cost ways to reassess broadband access. This study evaluates whether visual indicators from street imagery, alongside rural-urban typologies, can predict broadband usage, measured as the estimated share of residents using speeds at or above 25/3 Mbps. We focus on predictive accuracy for measurement and targeting rather than causal effects or policy levers.
+
+# Literature Review
+
+Reliable broadband access remains uneven across the United States, with rural areas persistently lagging suburban and urban counterparts despite decades of public investment and regulatory reform [@ali2021farmfresh; @strover2019digital; @hollman2021rural]. Early explanations centered on infrastructure scarcity, but contemporary scholarship frames the "rural digital divide" as an interaction among geography, market incentives, socioeconomic context, and policy design [@hollman2024a; @hollman2024b]. This review summarizes major theoretical and methodological advances and incorporates recent work on street-level imagery and machine learning.
+
+## Policy and Funding Landscape
+
+### Federal Funding Mechanisms and Constraints
+
+The Universal Service Fund (USF) and related high-cost programs have long been the principal federal tools for equalizing rural and urban service costs [@ali2021farmfresh; @americanconsumerinstitute2024usf]. Analysts note sustainability pressures and legal uncertainty [@mejia2024computer; @glass2021reforming; @class2025supreme]. Other programs (BEAD, ACP, USDA Community Connect, ReConnect) aim to expand infrastructure and improve speeds, with evidence of positive but uneven effects [@deller2022rural; @whitacre2014broadband; @kandilov2017impact; @goldstein2025impacts]. Disparities by race, income, and age persist in approved service areas [@pender2023three]. With the ACP ending in 2024 and funding uncertainty remaining [@benton2024project2025; @obermier2020economic], cost-efficient targeting remains central to broadband policy.
+
+### Rural Disparities in Current Broadband Mapping Systems
+
+Effective policymaking depends on accurate coverage data, yet the Federal Communications Commission (FCC) historically collected information at census block granularity, a resolution that systematically overestimates rural availability [@grubesic2015spatially]. Consumer-reported speed tests expose mismatches between official maps and on-the-ground performance, but crowdsourced datasets are socioeconomically biased [@hollman2024a; @ookla2021crowdsourced; @saxon2022what]. American Community Survey (ACS) estimates report an adoption gap between rural and urban households [@mejia2024computer], while other sources report higher access rates [@asce2025reportcard]. Major et al. [@major2020nowans] reverse engineered Internet service provider (ISP) availability checkers and submitted millions of address queries across multiple states, showing FCC broadband maps overstate availability and speeds in rural and minority communities. Rural heterogeneity motivates typologies and GIS-based zoning approaches, including LiDAR[^1] and parcel data to identify priority zones and vertical assets [@strover2019digital; @hollman2024a; @hossain2024gis; @kostelnick2024mapping].
+
+[^1]: LiDAR is a remote sensing method that creates 3D models of objects and terrain.
+
+## Emerging Methodological Innovations
+
+### Computer Vision and Street Imagery for Infrastructure Assessment
+
+A critical barrier is the lack of detailed broadband infrastructure inventories. Providers self-report to the FCC Broadband Data Collection and may list planned infrastructure that is not yet deployed. Computer vision (CV) methods may offer a partial remedy. Prior work uses CNNs and satellite imagery to detect towers and other infrastructure [@krell2023enabling], and civil engineering CV to identify poles, cables, and other linear assets [@koch2015review; @chow2020civil]. Ground-level imagery studies show street view features can predict socioeconomic indicators and safety outcomes [@gebru2017using; @liu2017place]. Large-scale public health work links street features to health outcomes, but image quality and temporal variation can limit reliability [@nguyen2021leveraging; @egli2019viewing; @fan2025coverage].
+
+### Integrating Social Science Data with Quantitative Results
+
+Integrating broadband metrics with socioeconomic indicators and behavioral data remains an active area. Multimodal machine learning frameworks enable fusion of visual, textual, and numerical modalities [@baltrusaitis2018multimodal]. Recent work merges crowdsourced speed tests with income data and behavioral models to study adoption in rural settings [@saxon2022what; @agarwal2024adoption]. These approaches motivate evaluating whether street imagery adds predictive value to typology-based models.
+
+## Exploring a New Method of Broadband Measurement
+
+This literature motivates the study. Rural broadband availability and adoption lag behind urban counterparts despite substantial federal funding. Existing measurement approaches can be time-consuming and costly, and typologies of rurality vary in definition and policy relevance. CV and street imagery offer an alternative way to predict broadband usage in rural areas that merits evaluation. This study tests whether geographic typologies and visual indicators can forecast broadband usage and inform targeting. By evaluating which variables and analytic approaches are most predictive, this study contributes to a data-informed framework for identifying underserved communities and guiding broadband policy.
+
+# Data and Methods
+
+We predict broadband usage across 264 ZIP Code Tabulation Areas (ZCTAs) in eastern Nebraska, a state spanning urban, suburban, and rural contexts. We describe the study area definition, input features, target variable, and evaluation framework used for model training.
+
+## Study Area Definition
+
+Nebraska occupies the central Great Plains, with terrain transitioning from the Missouri River valley in the east to the semi-arid High Plains and Sandhills in the west. The state's population and economic activity concentrate along the eastern corridor: Omaha (population ~490,000) and Lincoln (~295,000) anchor a metropolitan region that contains roughly half the state's residents. Moving westward, the landscape shifts from suburban development and irrigated cropland to dryland agriculture, ranching, and dispersed small towns. This east-west gradient provides variation across urban, suburban, and rural contexts for evaluating how visual and typological features relate to broadband adoption.
+
+The study sample includes 264 ZCTAs in Nebraska, representing approximately 50% of the state's ~530 ZCTAs. Selection was based on three criteria: (1) availability of Microsoft broadband usage labels, (2) valid RUCA codes from USDA, and (3) geographic concentration in the eastern portion of the state. The sample spans the full RUCA spectrum from metropolitan cores (Omaha, Lincoln) to remote rural areas, though it is geographically concentrated in the eastern half of Nebraska. This concentration reflects both population density, as most Nebraskans live in the eastern corridor, and data availability.
+
+Of these 264 ZCTAs, Google Street View imagery is available for 261 (98.9%). The three ZCTAs without imagery are excluded from visual-only and combined model analyses but retained for RUCA-only baseline comparisons. All spatial CV analyses use the same 264-ZCTA sample for consistency; visual features for the three ZCTAs without imagery are set to zero when included. The study area and included ZCTAs are shown in @fig-study-area.
+
+![Nebraska study area showing the 264 ZCTAs included in the analysis. Lincoln and Omaha are labeled for reference. The sample concentrates in eastern Nebraska due to imagery availability and population density.](figures/fig_study_area.png){#fig-study-area}
+
+## Input Features
+
+### Google Street View Imagery and Sampling
+
+We link Google Street View (GSV) imagery to ZCTAs using a structured sampling protocol. For each ZCTA, we identify candidate sampling points from OpenStreetMap building centroids, ranked by building footprint area to prioritize larger structures such as commercial buildings, schools, and public facilities that are more likely to have street-level coverage. From each candidate point, we request four images at cardinal headings (0°, 90°, 180°, 270°) using the GSV Static API at 640×640 pixel resolution. The API returns the nearest available panorama to each requested location; we do not constrain imagery dates, so temporal coverage varies by location, typically spanning 2018 to 2023.
+
+In the study dataset, imagery is available for 261 ZCTAs, totaling 7,619 images with a mean of 29.2 images per covered ZCTA, ranging from 4 to 52. For modeling, we cap extraction at 10 images per ZCTA, selected alphabetically by filename for reproducibility. ZCTAs with fewer images contribute all available frames. Cap-sensitivity analyses using the RUCA categorical model under contiguity-based spatial CV across 5, 10, 20, and all images yield R² from -0.28 to -0.27; conclusions are unchanged.
+
+### Rural-Urban Typology Data
+
+We use Rural-Urban Commuting Area (RUCA) codes as a proxy for urban-rural context. RUCA codes classify U.S. census tracts using measures of population density, urbanization, and commuting patterns, providing a standardized proxy for the character of a place. We use ZCTA-level RUCA codes from the U.S. Department of Agriculture [@usda2020ruca]. Each ZCTA is assigned primary (RUCA1) and secondary (RUCA2) codes. Robustness checks show RUCA2-only and RUCA1+RUCA2 variants yield only modest, high-variance gains under spatial CV, so the main models use RUCA1 for parsimony.
+
+### Unit of Analysis and Policy Use Case
+
+The unit of analysis is the ZCTA, which is coarser than the census-block or location-level resolution used in programs such as BEAD. Within a fixed geographic region where training and deployment areas overlap, RUCA typology provides a useful screening signal for prioritizing audits. However, deploying models to new geographic regions (as tested by spatial CV) substantially degrades performance, limiting cross-regional triage applications. Because ZCTAs can be spatially large and heterogeneous, predictions are not suitable for direct block-level targeting or for inferring causal policy levers.
+
+### Visual Feature Engineering
+
+To translate visual characteristics into quantifiable data, we extract a 24-feature OpenCV set from each image. The features capture edge density and orientation (vertical/horizontal), infrastructure and road proxies (infrastructure ratio, road/building/pole/wire density, pavement ratio), texture and structure (structure complexity, urban texture, development index, infrastructure continuity, built ratio, openness), and color/scene composition (brightness, saturation, color variance, vegetation/sky/gray ratios, hue diversity, contrast, colorfulness). Feature values are aggregated to the ZCTA level by averaging across images within each ZCTA.
+
+We use publicly available GSV imagery accessed through the Google Street View Static API in accordance with Google's terms of service. The analysis is conducted at the ZCTA level on aggregated features and does not attempt to identify individuals or private attributes; the study does not involve human subjects.
+
+## Target Variable: Broadband Usage Data
+
+For the target variable, we use the "U.S. Broadband Usage Percentages" dataset from Microsoft Research. This public dataset estimates broadband usage at the ZCTA level across the United States using Microsoft service and application telemetry. The target is the estimated percentage of the population within each ZCTA using the internet at or above 25/3 Mbps. We interpret this measure as a usage/adoption proxy rather than a direct measure of infrastructure availability. The telemetry may underrepresent populations with limited Microsoft usage or device access, and the file does not provide an explicit year field.
+
+### Measurement Governance Considerations
+
+Using private-sector telemetry as ground truth for broadband policy raises normative concerns. The Microsoft dataset reflects usage patterns of users with Microsoft devices, applications, and services---potentially underrepresenting households with limited device ownership, those using non-Microsoft platforms, or mobile-only users. Demographic groups less likely to own Windows computers or use Microsoft services may be systematically underrepresented.
+
+We chose Microsoft telemetry over alternatives such as FCC Form 477/Broadband Data Collection, ACS self-reports, and Ookla speed tests because it provides granular ZCTA-level estimates of actual speeds achieved rather than advertised availability. FCC data historically overstate coverage; ACS questions ask about "internet access" without speed thresholds; speed tests are voluntary and skew toward engaged users.
+
+For policy use, we recommend triangulating predictions from this model with local speed tests, community surveys, and provider availability data. The model is positioned as a screening tool to prioritize deeper audits rather than a definitive determination of need. Errors in the underlying usage labels propagate to model predictions, so caution is warranted when using predictions for funding allocation.
+
+## Modeling and Evaluation
+
+We evaluate three feature configurations: (1) RUCA-only baselines using RUCA1, (2) visual-only models using the OpenCV feature set, and (3) combined models that include RUCA1 and the visual features. For each configuration, we compare linear regression, ElasticNet, and tree-based ensembles (Random Forest, Extra Trees, Gradient Boosting). Tree ensembles are tuned on the training split. Robustness checks report spatial cross-validation with nested tuning and diagnostics, including RUCA group-mean baselines, RUCA2 variants, late-fusion stacking, and block-level coefficient norms. Performance is assessed on a fixed 80/20 train-test split at the ZCTA level (random seed = 42) and reported using test $R^2$ as the primary metric, alongside RMSE and MAE (in proportion units; multiply by 100 for percentage points).
+
+Within each cross-validation fold, feature standardization is fit on the training data only and applied to the held-out fold to avoid leakage. The analysis uses the 24 OpenCV features only; no PCA or CNN embeddings are included.
+
+### Spatial Cross-Validation Methodology
+
+Standard random cross-validation can overestimate model performance when observations are spatially autocorrelated---neighboring ZCTAs have similar broadband usage patterns, allowing models to "leak" information across folds. We use spatial cross-validation to enforce geographic separation between training and test sets.
+
+Our canonical spatial CV uses queen contiguity clustering: we construct a connectivity graph where ZCTAs sharing any boundary (edge or vertex) are neighbors, then apply agglomerative clustering with ward linkage to partition ZCTAs into five spatially contiguous groups. GroupKFold ensures each fold is held out entirely during evaluation. This approach tests whether models can generalize to "isolated" geographic regions not seen during training---a conservative test relevant for deployment to new areas.
+
+We also evaluate sensitivity to four alternative spatial partitioning schemes: k-means clustering on ZCTA centroids (creating compact spatial groups), latitude bands (five north-south strips), longitude bands (five east-west strips), and spatial blocks (a 2D grid of roughly equal-area cells). These alternatives test different generalization scenarios. Nebraska's urban-rural gradient runs east-to-west (Omaha and Lincoln in the east, rural areas in the west), so longitude bands align with this gradient and allow models to extrapolate along the known urban-rural axis---a less conservative test than contiguity, which creates spatially isolated holdout regions.
+
+The fold map for contiguity-based grouping is shown in @fig-spatial-groups. Fold sizes range from 31 to 121 ZCTAs with a mean of 53, reflecting substantial imbalance: Fold 1, covering the Omaha/Lincoln metro area, contains 121 ZCTAs, while the remaining folds contain 31 to 38 each. All five folds contain multiple RUCA categories, though the distribution varies substantially by fold as detailed in Appendix C.
+
+![Spatial cross-validation fold assignments from contiguity-based ZCTA clustering (queen). Five spatially contiguous groups ensure geographic separation between training and test sets.](figures/fig_spatial_groups.png){#fig-spatial-groups}
+
+# Results
+
+Our analysis evaluated linear, ElasticNet, and ensemble models across RUCA-only, visual-only, and combined feature sets using a fixed holdout split. The results show a clear hierarchy: RUCA typology features remain the strongest predictors, while visual features capture a moderate signal that does not surpass the RUCA-only ensembles.
+
+## Overall Model Performance
+
+A comparison of all modeling approaches highlights the strength of RUCA-only ensembles and the limits of incremental gains from visual features. Table 1 reports baseline holdout metrics, while Table 2 reports tuned tree ensemble results on the same split.
+
+**Table 1: Holdout Model Performance (Test $R^2$, RMSE, MAE)**
+
+| Feature Set | Model | Test $R^2$ | RMSE | MAE |
+| --- | --- | --- | --- | --- |
+| RUCA only | Numeric (naive) | 0.144 | 0.270 | 0.216 |
+| RUCA only | One-hot Ridge | 0.400 | 0.226 | 0.174 |
+| RUCA only | Random Forest | 0.391 | 0.228 | 0.175 |
+| RUCA only | Extra Trees | 0.392 | 0.228 | 0.175 |
+| RUCA only | Gradient Boosting | 0.392 | 0.228 | 0.175 |
+| Visual only | ElasticNet | 0.299 | 0.244 | 0.194 |
+| Visual only | Extra Trees | 0.287 | 0.247 | 0.192 |
+| Visual only | Random Forest | 0.230 | 0.256 | 0.203 |
+| Visual only | Gradient Boosting | 0.231 | 0.256 | 0.203 |
+| Combined | ElasticNet | 0.299 | 0.244 | 0.194 |
+| Combined | Extra Trees | 0.279 | 0.248 | 0.194 |
+| Combined | Random Forest | 0.228 | 0.257 | 0.202 |
+| Combined | Gradient Boosting | 0.251 | 0.253 | 0.201 |
+
+**Table 2: Tuned Tree Ensemble Performance (Test $R^2$, RMSE, MAE)**
+
+| Feature Set | Model | Test $R^2$ | RMSE | MAE |
+| --- | --- | --- | --- | --- |
+| RUCA only | Random Forest (tuned) | 0.410 | 0.224 | 0.169 |
+| RUCA only | Extra Trees (tuned) | 0.392 | 0.228 | 0.175 |
+| RUCA only | Gradient Boosting (tuned) | 0.391 | 0.228 | 0.175 |
+| Visual only | Random Forest (tuned) | 0.293 | 0.245 | 0.197 |
+| Visual only | Extra Trees (tuned) | 0.373 | 0.231 | 0.180 |
+| Visual only | Gradient Boosting (tuned) | 0.294 | 0.245 | 0.196 |
+| Combined | Random Forest (tuned) | 0.326 | 0.240 | 0.193 |
+| Combined | Extra Trees (tuned) | 0.376 | 0.231 | 0.180 |
+| Combined | Gradient Boosting (tuned) | 0.291 | 0.246 | 0.196 |
+
+*Note: RMSE/MAE are in proportion units; multiply by 100 to interpret as percentage points.*
+
+## The Predictive Power of Rural-Urban Typology
+
+RUCA alone remains a strong predictor. A naive numeric RUCA baseline achieves an R² of 0.144, but a one-hot RUCA ridge model reaches 0.400 and the tuned Random Forest reaches 0.410 on the holdout split. Under contiguity-based spatial CV, a simple RUCA group-mean baseline yields R² = -0.31 ± 0.21, similar to the categorical ridge (-0.28 ± 0.19). The broadband usage distribution by RUCA category and the corresponding residual map highlight where RUCA alone systematically under- or over-predicts, as shown in @fig-broadband-by-ruca-boxplot and @fig-ruca-residual-map.
+
+## Comparison with ACS Socioeconomic Baseline
+
+To test whether RUCA is truly the best "cheap baseline," we compare it to American Community Survey (ACS) socioeconomic features: median household income, percent age 65+, percent with bachelor's degree or higher, percent owner-occupied housing, and log population. Under contiguity-based spatial CV, ACS-only achieves R² = -0.15 ± 0.27, slightly outperforming RUCA categorical (-0.28 ± 0.19). Combining ACS with RUCA does not improve performance (-0.28 ± 0.20). Although ACS features show somewhat better generalization, neither baseline achieves positive R² under the most conservative spatial validation, indicating that all "cheap" predictors struggle to extrapolate to isolated geographic regions. Full ACS comparison results are reported in Appendix B.
+
+![Broadband usage distribution by RUCA category. RUCA codes: 1 = Metropolitan core, 2-3 = Metropolitan commuting, 4 = Micropolitan core, 5-6 = Micropolitan commuting, 7 = Small town core, 8-9 = Small town commuting, 10 = Rural.](figures/fig_broadband_by_ruca_boxplot.png){#fig-broadband-by-ruca-boxplot}
+
+![Residuals from a RUCA group-mean baseline by ZCTA.](figures/fig_ruca_residual_map.png){#fig-ruca-residual-map}
+
+## The Limited Contribution of Visual Features
+
+In contrast to the typology data, visual features show a moderate but weaker signal. Tuning improves the best visual-only model (Extra Trees) to $R^2$ = 0.37 on the holdout split, but this remains below the RUCA-only baselines. Under contiguity-based spatial CV, visual-only models show negative R² values with high variance (-0.51 ± 0.57), indicating limited geographic generalization. These results indicate that visual cues capture meaningful information about broadband usage, but the signal remains weaker than RUCA.
+
+## Combined Model Performance
+
+Combined models do not outperform the RUCA-only baselines. The best combined specification (tuned Extra Trees) reaches $R^2$ = 0.38 on the holdout split, remaining below the RUCA-only one-hot ridge (0.40) and tuned Random Forest (0.41). A late-fusion (stacked) model yields R² = -0.28 ± 0.19 under spatial CV, and block-level coefficient norms show the RUCA block dominates (L2: 0.41 vs 0.09 for the visual block). This pattern suggests that typology dominates performance and that visual features offer limited incremental gains when fused with RUCA.
+
+## Model Validation
+
+All results in Tables 1 and 2 use the same fixed holdout split to ensure comparability across feature sets and model classes. Contiguity-based spatial cross-validation with nested tuning yields substantially lower R² values: RUCA categorical ridge -0.28 ± 0.19, RUCA group-mean baseline -0.31 ± 0.21, and tuned Random Forest -0.21 ± 0.14. Adding RUCA2 yields only a modest, noisy improvement (RUCA1+RUCA2 categorical -0.24 ± 0.18). Visual-only models remain negative under spatial CV (-0.51 ± 0.57), and combined models are modest at best (tuned one-stage Extra Trees -0.39 ± 0.27; tuned two-stage -0.28 ± 0.19; late fusion -0.28 ± 0.19).
+
+### Sensitivity to Spatial Grouping Method
+
+Spatial CV estimates depend substantially on how geographic folds are defined. RUCA categorical R² ranges from -0.28 (contiguity) to 0.22 (longitude bands), while the combined two-stage model ranges from -0.39 (contiguity) to 0.04 (longitude bands). This variation reflects Nebraska's east-west urban-rural gradient: longitude bands allow models to extrapolate along this known axis, while contiguity-based folds test harder "isolated region" scenarios where models must generalize to areas surrounded by training data but held out entirely.
+
+We treat contiguity-based folds as canonical because they represent the more conservative deployment scenario---predicting to a new geographic region with limited nearby training data. The positive R² values under longitude bands indicate that RUCA typology successfully captures the east-west gradient, but this may overstate real-world performance if models are deployed to regions with different spatial structure.
+
+### Late-Fusion Stacking Approach
+
+The late-fusion model fits RUCA-only and visual-only base learners separately, then stacks their predictions using a ridge meta-learner. To avoid leakage, base learner predictions on the training fold are generated via cross-validation before fitting the meta-learner. This approach allows each feature block to use its optimal regularization---α=1 for RUCA and α=100 for visual---while learning an optimal combination weight. Block-level coefficient norms confirm the RUCA block dominates (L2: 0.41 vs 0.09 for visual), indicating that typology drives most of the predictive signal.
+
+## Limitations
+
+This study has several limitations. First, the sample of 264 ZCTAs is modest and limited to eastern Nebraska, so results may not generalize to other regions with different spatial structure or visual heterogeneity. Second, the outcome comes from Microsoft telemetry and is a usage/adoption proxy rather than a direct measure of infrastructure availability, which may bias policy interpretations. Third, temporal alignment is imperfect: RUCA codes date from 2010, imagery was captured between 2018 and 2023, and usage estimates lack explicit dating. Fourth, spatial dependence remains a challenge even with spatial cross-validation; the negative R² values under contiguity-based CV suggest models struggle to generalize to isolated geographic regions. Fifth, the feature extraction approach uses a handcrafted OpenCV feature set rather than end-to-end image models, so conclusions about the value of imagery are limited to this representation. Sixth, the study area is geographically concentrated in eastern Nebraska; western Nebraska's Sandhills region has sparser coverage and different visual characteristics.
+
+## Reproducibility and Data Availability
+
+All reported metrics are computed from the analyses described above. Hyperparameter grids and software versions are reported below to support reproducibility.
+
+Reproducibility details:
+- Spatial CV: 5 geographic groups via contiguity-constrained clustering of ZCTA polygons (queen); GroupKFold; repeated CV uses 5 splits x 10 repeats; tuning uses 3 inner folds. Sensitivity methods: kmeans, geographic_bands (latitude), longitude_bands, spatial_blocks.
+- Hyperparameter grids: ridge alpha in {0.1, 1, 10, 100}; ElasticNet alpha in {0.01, 0.1, 1, 10}, l1_ratio in {0.1, 0.5, 0.9}; RF/ExtraTrees n_estimators = 200, max_depth in {None, 10}, min_samples_leaf in {1, 5}, max_features in {sqrt, 0.5}; GBRT n_estimators in {100, 300}, learning_rate in {0.05, 0.1}, max_depth in {2, 3}, subsample in {1.0, 0.8}.
+- Software versions: Python 3.12.2; numpy 2.2.6; pandas 2.3.1; scikit-learn 1.7.2; matplotlib 3.10.0; geopandas 1.1.1; shapely 2.1.2.
+
+The OpenCV feature set includes 24 variables: edge_density, vertical_density, horizontal_density, infrastructure_ratio, road_density, building_density, pole_density, wire_density, pavement_ratio, structure_complexity, urban_texture, development_index, infrastructure_continuity, built_ratio, openness, brightness, saturation, color_variance, vegetation_ratio, sky_ratio, gray_ratio, hue_diversity, contrast, and colorfulness.
+
+Raw GSV imagery is subject to Google terms of service and cannot be redistributed; derived ZCTA-level feature aggregates and model outputs can be shared. The broadband usage labels are from Microsoft Research's U.S. Broadband Usage Percentages dataset.
+
+# Discussion
+
+This study's findings offer clear insights into modeling strategy for digital divide research. The strongest holdout performance comes from tuned models with proper categorical encoding of a simple geographic typology: RUCA-only models reach $R^2$ around 0.40, while visual features reach $R^2$ around 0.37 and do not improve upon the RUCA baseline when combined. These results are predictive rather than causal; they support measurement and targeting use cases, not claims about policy levers. This hierarchy indicates that typology remains the most reliable signal in this setting, even when augmented with richer visual representations.
+
+## Limits of Street-Level Visual Signal
+
+Street-level imagery provides a measurable but limited signal. Visual-only models reach $R^2$ around 0.37 after tuning, indicating that the built environment conveys information about broadband usage, but the signal does not surpass the typology baseline. The gap likely reflects visual homogeneity across much of Nebraska and the difficulty of inferring infrastructure quality from facades alone. Poles, ducts, and cabinets are often visible, but distinguishing legacy copper from modern fiber is challenging from street-level imagery. With a cap of 10 images per ZCTA, the visual signal remains constrained and may underrepresent within-ZCTA heterogeneity. These factors limit the incremental value of the visual features in this region.
+
+## Future Directions for Visual Models
+
+Although the visual models do not outperform the RUCA baseline, their moderate signal suggests room for improvement through better supervision and more targeted visual cues. Infrastructure providers could improve interpretability by differentiating visible assets in ways that allow reliable identification of fiber versus copper in imagery. With clearer visual indicators and larger samples, computer vision could become a more effective complement to typology-based targeting.
+
+## Implications for Future Research
+
+Even though the models did not perform as intended, this work points to a clear path for future research. Investigators should first maximize the predictive power of foundational, readily available datasets like geographic typologies through nonlinear ensemble methods. This approach is computationally and cost-efficient and, as we have shown, can yield strong results. Only after exhausting the potential of such data should researchers consider more complex and computationally expensive sources. Our findings suggest a shift in focus may be warranted: satellite or aerial imagery may prove more effective than street-level imagery. Satellite data capture land-use patterns, building density, vegetation cover, and transportation networks that may correlate more strongly with the rural-urban spectrum and infrastructure deployment patterns. Analyzing the broader spatial environment of a location, rather than the facade of its buildings, is likely a more robust method for differentiating between areas in a visually homogeneous region like Nebraska. Overall, the study serves as a case study in modeling strategy. It shows that model choice and the ability to capture nonlinearities in existing data can matter more than adding modalities. The value of visual data is context-dependent; assumptions that hold in one setting may not transfer without validation. By prioritizing nonlinear analysis of foundational data, researchers can build strong, efficient models to help bridge the digital divide.
+
+# Conclusion
+
+This study evaluates whether street-level imagery improves prediction of broadband usage beyond a rural-urban typology across Nebraska ZCTAs. RUCA-based models provide the strongest performance on the fixed holdout split (R² = 0.40), while OpenCV visual features add a modest signal that does not surpass the typology baseline. However, spatial cross-validation indicates limited cross-regional generalization: policy-relevant metrics show ranking inversions (Spearman ρ = -0.19) and random-level triage performance (Precision@20% = 0.19). RUCA-based screening is appropriate within characterized regions but should not be deployed to new areas without local validation. Future work should prioritize stronger spatial validation, larger regional samples, and alternative imagery sources or feature representations to determine when visual signals meaningfully improve broadband measurement.
+
+# References {.unnumbered}
+
+::: {#refs}
+:::
+
+# Appendix A: Spatial CV Sensitivity {.unnumbered}
+
+Table A1 summarizes spatial cross-validation performance across alternative spatial grouping definitions (mean ± SD R²). Contiguity-based folds (queen) are the canonical specification; coordinate-based methods are provided for sensitivity.
+
+**Table A1: Spatial CV sensitivity by grouping definition (mean ± SD R²)**
+
+| Spatial grouping | RUCA categorical | RUCA1+RUCA2 categorical | RUCA group-mean | Combined two-stage | Late fusion |
+| --- | --- | --- | --- | --- | --- |
+| Contiguity (queen) | -0.28 ± 0.19 | -0.24 ± 0.18 | -0.31 ± 0.21 | -0.39 ± 0.29 | -0.28 ± 0.19 |
+| K-means (centroids) | -0.09 ± 0.29 | -0.04 ± 0.23 | -0.11 ± 0.30 | -0.28 ± 0.38 | -0.13 ± 0.33 |
+| Latitude bands | 0.12 ± 0.21 | 0.14 ± 0.18 | 0.11 ± 0.22 | -0.11 ± 0.23 | 0.10 ± 0.21 |
+| Longitude bands | 0.22 ± 0.16 | 0.22 ± 0.18 | 0.21 ± 0.16 | 0.04 ± 0.19 | 0.21 ± 0.15 |
+| Spatial blocks | 0.11 ± 0.26 | 0.10 ± 0.32 | 0.09 ± 0.28 | -0.04 ± 0.22 | 0.10 ± 0.22 |
+
+*Note: Longitude bands align with Nebraska's east-west urban-rural gradient (Omaha/Lincoln in east, rural west), explaining the stronger generalization. Contiguity-based folds test harder "isolated region" scenarios.*
+
+# Appendix B: ACS Baseline Comparison {.unnumbered}
+
+Table B1 compares RUCA typology to American Community Survey (ACS) socioeconomic features under contiguity-based spatial CV. ACS features include median household income, percent age 65+, percent with bachelor's degree or higher, percent owner-occupied housing, and log population.
+
+**Table B1: RUCA vs. ACS baseline comparison (contiguity-queen spatial CV)**
+
+| Model | R² (mean ± SD) | N features |
+| --- | --- | --- |
+| RUCA categorical | -0.28 ± 0.19 | 1 (10 categories) |
+| ACS-only | -0.15 ± 0.27 | 5 |
+| ACS + RUCA | -0.28 ± 0.20 | 6 |
+
+*Note: ACS features slightly outperform RUCA under spatial CV, but neither achieves positive R², indicating limited geographic generalization for all "cheap" baselines.*
+
+# Appendix C: Spatial CV Fold Composition {.unnumbered}
+
+Table C1 shows the composition of each spatial CV fold under contiguity-based (queen) grouping. Fold sizes range from 31 to 121 ZCTAs, with substantial imbalance due to the geographic distribution of ZCTAs.
+
+**Table C1: Fold composition for contiguity-based spatial CV**
+
+| Fold | N ZCTAs | Broadband (mean ± SD) | Metro (1-3) | Micro (4-6) | Small Town (7-9) | Rural (10) |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 121 | 0.45 ± 0.31 | 114 | 0 | 1 | 6 |
+| 2 | 37 | 0.27 ± 0.21 | 10 | 2 | 1 | 24 |
+| 3 | 38 | 0.35 ± 0.25 | 2 | 8 | 6 | 22 |
+| 4 | 31 | 0.16 ± 0.16 | 3 | 4 | 7 | 17 |
+| 5 | 37 | 0.25 ± 0.22 | 6 | 8 | 3 | 20 |
+
+*Note: Fold 1 contains 114 of 135 metropolitan ZCTAs (Omaha/Lincoln area), creating substantial RUCA imbalance across folds. When Fold 1 is held out, the model trains on limited metro examples and learns category means that underpredict for high-usage areas. Conversely, when rural-heavy folds are held out, training data skews metro-heavy, leading to overprediction. This imbalance is inherent to contiguity-based clustering of eastern Nebraska's geography---and tests the realistic scenario of deploying to a spatially distinct region.*
+
+# Appendix D: Policy-Relevant Evaluation Metrics {.unnumbered}
+
+Beyond R², we evaluate metrics relevant for policy use cases: ranking ability, precision in identifying underserved areas, and classification accuracy.
+
+**Table D1: Policy-relevant metrics for RUCA categorical model (contiguity-queen spatial CV)**
+
+| Metric | Value | Interpretation |
+| --- | --- | --- |
+| Spearman ρ | -0.19 | Weak negative rank correlation; model rankings inversely related to actual |
+| Precision@20% | 0.19 | 19% of ZCTAs predicted in bottom quintile are truly underserved |
+| Recall@20% | 0.19 | 19% of truly underserved ZCTAs correctly identified |
+| Sensitivity (< median) | 0.61 | 61% of below-median ZCTAs correctly flagged |
+| Specificity (< median) | 0.33 | 33% of above-median ZCTAs correctly excluded |
+
+*Note: Under contiguity-based spatial CV, RUCA category means learned from training data do not transfer to geographically distinct test folds. The negative Spearman correlation (-0.19) indicates systematic ranking inversion: when training excludes the metro-heavy Fold 1, predictions for metro areas are too low; when training includes Fold 1, predictions for rural-heavy test folds are too high. Precision@20% at 0.19 is no better than random selection. These metrics apply specifically to cross-regional deployment; within-region applications (fixed holdout) show R² = 0.40.*
+
+### Interpretation: Within-Region vs Cross-Region Deployment
+
+These metrics distinguish two deployment scenarios:
+
+1. **Within-region (fixed holdout, R² = 0.40)**: When training and test data come from the same geographic distribution, RUCA categorical encoding explains 40% of variance. The model can support screening within the study area.
+
+2. **Cross-region (spatial CV, R² = -0.28, Spearman ρ = -0.19)**: When the model must generalize to geographically isolated regions, performance degrades substantially. Category means learned from one region's RUCA distribution do not transfer to regions with different compositions. Ranking inversions occur because high-usage areas (metro) are systematically underpredicted when excluded from training, while low-usage areas (rural) are overpredicted.
+
+**Policy implication**: RUCA-based screening is appropriate for applications within a characterized region, such as prioritizing audits within eastern Nebraska. It is not appropriate for generalizing predictions to new states or regions without local validation.

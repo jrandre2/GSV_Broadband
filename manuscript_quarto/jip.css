@@ -1,0 +1,16 @@
+body,
+.quarto-title,
+.title,
+.subtitle,
+.quarto-title-block,
+.quarto-title-meta,
+.quarto-title-meta-heading,
+.quarto-title-meta-contents,
+.abstract,
+.abstract .block-title,
+.keywords,
+.keywords .block-title,
+h1, h2, h3, h4, h5, h6,
+p, li {
+  font-family: "Times New Roman", Times, serif;
+}

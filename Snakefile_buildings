@@ -1,0 +1,44 @@
+rule all:
+    input:
+        "data/interim/manifest_buildings_with_bsl.parquet"
+
+rule setup_zcta:
+    output: ".cache/geo/zcta22/tl_2022_us_zcta520.shp"
+    script: "scripts/setup_zcta_data.py"
+
+rule zip_list:
+    input:
+        zcta=".cache/geo/zcta22/tl_2022_us_zcta520.shp"
+    output: "data/raw/zip_east_264.csv"
+    script: "scripts/make_zip_list.py"
+
+rule ms_labels:
+    input:
+        zip_list="data/raw/zip_east_264.csv"
+    output: "data/interim/labels_ms.csv"
+    script: "scripts/build_labels_ms.py"
+
+rule download_ms_buildings:
+    output: ".cache/buildings/nebraska_buildings.parquet"
+    script: "scripts/download_ms_buildings.py"
+
+rule filter_buildings:
+    input:
+        buildings=".cache/buildings/nebraska_buildings.parquet",
+        zips="data/raw/zip_east_264.csv",
+        zcta=".cache/geo/zcta22/tl_2022_us_zcta520.shp"
+    output: "data/interim/study_area_buildings.parquet"
+    script: "scripts/filter_buildings_to_study_area.py"
+
+rule sample_buildings:
+    input:
+        buildings="data/interim/study_area_buildings.parquet",
+        ms_labels="data/interim/labels_ms.csv"
+    output: "data/interim/manifest_buildings.parquet"
+    script: "scripts/sample_buildings_for_manifest.py"
+
+rule match_bsl:
+    input:
+        manifest="data/interim/manifest_buildings.parquet"
+    output: "data/interim/manifest_buildings_with_bsl.parquet"
+    script: "scripts/match_buildings_to_bsl.py"

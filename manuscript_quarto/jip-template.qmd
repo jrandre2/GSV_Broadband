@@ -1,0 +1,216 @@
+---
+# Journal of Information Policy Article Template
+# =============================================
+#
+# SUBMISSION REQUIREMENTS:
+# - Word limit: 10,000 words (excluding abstract, tables, refs, footnotes)
+# - Citation style: Chicago Manual of Style 18th ed, Notes-Bibliography
+# - Figures: Submit as SEPARATE files (300 dpi, >= 2.25" wide, TIFF/JPG)
+# - Include alt text for all figures and tables
+# - Submit anonymous version + cover page for peer review
+#
+# Usage: quarto render jip-template.qmd --profile jip
+
+title: "What Predicts Broadband Usage? A Comparison of Computer Vision and Rural Urban Typology Machine Learning Models"
+
+# Author information (for cover page - remove from anonymous version)
+# Comment out or delete this block for anonymous submission
+author:
+  - name: "Author Name"
+    affiliation: "Texas Tech University"
+    email: "author@ttu.edu"
+    orcid: "0000-0000-0000-0000"
+
+# JIP-style "Introductory Statement" (~100 words, policy-focused)
+# Alternative: 150-200 word abstract
+# Focus on: What policy question? What finding? What implication?
+abstract: |
+  This study asks whether Google Street View imagery improves prediction of broadband
+  usage (estimated percent accessing >=25/3 Mbps) beyond rural-urban typology across
+  264 Nebraska ZIP codes (ZCTAs). We extract handcrafted visual features and pretrained
+  CNN embeddings (no fine-tuning) from 7,619 images and compare RUCA-only, visual-only,
+  and combined models. On a fixed holdout split, tuned RUCA-only models reach test $R^2$
+  around 0.40, visual-only models reach about 0.37, and combined models do not exceed
+  the RUCA baseline. Spatial cross-validation substantially lowers performance,
+  indicating limited geographic generalization.
+
+keywords:
+  - broadband
+  - computer vision
+  - machine learning
+  - rural-urban typology
+  - spatial cross-validation
+
+# Funding statement (if applicable)
+# funding: "This research was supported by..."
+
+# Quarto configuration
+format:
+  docx:
+    reference-doc: jip-reference.docx
+bibliography: references.bib
+csl: csl/chicago-fullnote-bibliography.csl
+---
+
+# Introduction
+
+<!--
+JIP GUIDANCE: Introduction should:
+- Establish the policy relevance
+- Identify the research gap
+- State the research question clearly
+- Preview the contribution
+-->
+
+The digital divide between rural and urban communities remains a persistent policy challenge.^[For comprehensive reviews of broadband policy, see...]
+Understanding what predicts broadband adoption is essential for targeting infrastructure investments effectively.
+
+This study asks: Can visual indicators of community infrastructure, extracted through computer vision from street-level imagery, improve predictions of broadband usage beyond traditional rural-urban classifications?
+
+# Literature Review
+
+<!--
+Organize around key themes:
+1. Broadband adoption determinants
+2. Rural-urban digital divide
+3. Computer vision for infrastructure assessment
+4. RUCA classification and its limitations
+-->
+
+## Broadband Adoption Determinants
+
+Prior research has identified multiple factors influencing broadband adoption, including income, education, age demographics, and infrastructure availability.^[Citation needed]
+
+## Visual Infrastructure Assessment
+
+Recent advances in computer vision have enabled researchers to assess infrastructure conditions from imagery.^[Citation needed]
+
+# Data and Methods
+
+## Study Area
+
+Our analysis focuses on 264 ZIP codes in eastern Nebraska, representing a mix of urban, suburban, and rural communities.
+
+## Data Sources
+
+### Broadband Usage Data
+
+Broadband usage rates were obtained from [data source] and represent the percentage of households with broadband subscriptions.
+
+### Street View Imagery
+
+Google Street View images were collected for each ZIP code, with up to 10 locations sampled per area.
+
+### RUCA Classifications
+
+Rural-Urban Commuting Area (RUCA) codes provide a census tract-based classification of metropolitan, micropolitan, small town, and rural areas.
+
+## Feature Extraction
+
+We extracted 24 visual features from street-level imagery using computer vision techniques:
+
+- **Infrastructure features** (15): Edge density, road presence, building detection, etc.
+- **Environmental features** (9): Vegetation coverage, sky visibility, color characteristics
+
+## Analytical Approach
+
+### Model Specifications
+
+We compare three model specifications:
+
+1. **RUCA baseline**: RUCA codes only (categorical encoding)
+2. **Visual only**: 24 visual features with L2 regularization
+3. **Combined**: Two-stage model with RUCA + visual features on residuals
+
+### Spatial Cross-Validation
+
+To prevent spatial autocorrelation from inflating performance estimates, we employ spatial cross-validation with geographically defined fold groups.
+
+# Results
+
+## Descriptive Statistics
+
+<!-- Include descriptive statistics table here -->
+
+## Model Performance
+
+<!--
+JIP NOTE: Tables should be submitted as separate files with:
+- Table number and title
+- Source notes
+- Any necessary footnotes
+-->
+
+| Model | R-squared | RMSE | Notes |
+|-------|-----------|------|-------|
+| RUCA baseline | 0.110 | X.XX | 4 RUCA categories |
+| Visual only | 0.022 | X.XX | 24 features, alpha=100 |
+| Combined | 0.116 | X.XX | Two-stage approach |
+
+: Model performance comparison using spatial cross-validation {#tbl-results}
+
+## Spatial Cross-Validation vs. Random CV
+
+Comparing spatial to random cross-validation reveals evidence of spatial autocorrelation affecting model evaluation.
+
+# Discussion
+
+## Key Findings
+
+Our results suggest that visual infrastructure characteristics captured through street-level imagery do not substantially improve broadband usage predictions beyond RUCA classifications alone.
+
+## Policy Implications
+
+<!--
+JIP GUIDANCE: Discussion should explicitly address:
+- Policy relevance of findings
+- Actionable recommendations
+- Limitations for policy application
+-->
+
+These findings have several implications for broadband policy:
+
+1. **Targeting investments**: Traditional rural-urban classifications may be sufficient for identifying underserved areas.
+
+2. **Assessment methods**: Computer vision-based infrastructure assessment may be more valuable for other applications.
+
+## Limitations
+
+This study has several limitations that should be considered when interpreting results:
+
+- Geographic scope limited to Nebraska
+- Image availability constraints in rural areas
+- Temporal mismatch between imagery and broadband data
+
+# Conclusion
+
+<!--
+Brief summary of:
+- Main finding
+- Policy takeaway
+- Future research directions
+-->
+
+This study examined whether computer vision analysis of street-level imagery could improve predictions of broadband adoption. Our findings suggest that while visual features capture some variance in broadband usage, they do not substantially improve upon traditional rural-urban classification systems for policy targeting purposes.
+
+Future research should explore whether alternative imagery sources (satellite, aerial) or different feature extraction approaches might prove more predictive.
+
+# References
+
+::: {#refs}
+:::
+
+<!--
+===========================================
+SUBMISSION CHECKLIST FOR JIP:
+===========================================
+[ ] Word count <= 10,000 (excluding abstract, tables, refs, footnotes)
+[ ] All citations in Chicago Notes-Bibliography format
+[ ] Figures submitted as separate files (300 dpi, >= 2.25")
+[ ] Alt text provided for all figures and tables
+[ ] Anonymous version created (author info removed)
+[ ] Cover page with author info prepared
+[ ] URLs include access dates
+[ ] Funding acknowledgments included (if applicable)
+===========================================
+-->

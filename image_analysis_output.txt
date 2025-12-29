@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/Users/jesseandrews/GSV_Broadband/GSV_Broadband/streamlined_image_analysis.py", line 13, in <module>
+    from sklearn.model_selection import GroupKFold
+  File "/opt/anaconda3/lib/python3.12/site-packages/sklearn/__init__.py", line 73, in <module>
+    from .base import clone  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.12/site-packages/sklearn/base.py", line 19, in <module>
+    from .utils._metadata_requests import _MetadataRequester, _routing_enabled
+  File "/opt/anaconda3/lib/python3.12/site-packages/sklearn/utils/__init__.py", line 9, in <module>
+    from ._chunking import gen_batches, gen_even_slices
+  File "/opt/anaconda3/lib/python3.12/site-packages/sklearn/utils/_chunking.py", line 11, in <module>
+    from ._param_validation import Interval, validate_params
+  File "/opt/anaconda3/lib/python3.12/site-packages/sklearn/utils/_param_validation.py", line 17, in <module>
+    from .validation import _is_arraylike_not_scalar
+  File "/opt/anaconda3/lib/python3.12/site-packages/sklearn/utils/validation.py", line 21, in <module>
+    from ..utils._array_api import _asarray_with_order, _is_numpy_namespace, get_namespace
+  File "/opt/anaconda3/lib/python3.12/site-packages/sklearn/utils/_array_api.py", line 14, in <module>
+    import scipy.special as special
+  File "/opt/anaconda3/lib/python3.12/site-packages/scipy/special/__init__.py", line 790, in <module>
+    from . import _basic
+  File "/opt/anaconda3/lib/python3.12/site-packages/scipy/special/_basic.py", line 22, in <module>
+    from ._multiufuncs import (assoc_legendre_p_all,
+  File "/opt/anaconda3/lib/python3.12/site-packages/scipy/special/_multiufuncs.py", line 142, in <module>
+    sph_legendre_p = MultiUFunc(
+                     ^^^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.12/site-packages/scipy/special/_multiufuncs.py", line 41, in __init__
+    raise ValueError("All ufuncs must have type `numpy.ufunc`."
+ValueError: All ufuncs must have type `numpy.ufunc`. Received (<ufunc 'sph_legendre_p'>, <ufunc 'sph_legendre_p'>, <ufunc 'sph_legendre_p'>)

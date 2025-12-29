@@ -1,0 +1,89 @@
+---
+# Journal of Information Policy - Cover Page
+# ==========================================
+# This cover page accompanies the anonymous manuscript submission.
+# It contains author information that is excluded from the main document.
+
+title: "Cover Page for Manuscript Submission"
+subtitle: "Journal of Information Policy"
+date: today
+format:
+  docx:
+    reference-doc: jip-reference.docx
+---
+
+# Article Title
+
+**What Predicts Broadband Usage? Exploring Computer Vision and Rural-Urban Typology Machine Learning Models**
+
+# Author Information
+
+## Author 1 (Corresponding Author)
+
+- **Name**: [Full Name]
+- **Affiliation**: [Department], [Institution]
+- **Address**: [Full Mailing Address]
+- **Email**: [email@institution.edu]
+- **ORCID**: [0000-0000-0000-0000]
+- **Phone**: [Phone Number]
+
+## Author 2 (if applicable)
+
+- **Name**: [Full Name]
+- **Affiliation**: [Department], [Institution]
+- **Email**: [email@institution.edu]
+- **ORCID**: [0000-0000-0000-0000]
+
+# Author Contributions
+
+<!--
+Use CRediT taxonomy if applicable:
+https://credit.niso.org/
+-->
+
+- **[Author 1]**: Conceptualization, Methodology, Software, Formal Analysis, Writing - Original Draft
+- **[Author 2]**: Supervision, Writing - Review & Editing
+
+# Acknowledgments
+
+[Include acknowledgments here. This section will not appear in the anonymous version.]
+
+# Funding Statement
+
+This research received no specific grant from any funding agency in the public, commercial, or not-for-profit sectors.
+
+<!--
+OR, if funded:
+This research was supported by [Funding Agency] under Grant [Number].
+-->
+
+# Conflicts of Interest
+
+The authors declare no conflicts of interest.
+
+# Data Availability Statement
+
+The data and code supporting the findings of this study are available at [repository URL] or upon request from the corresponding author.
+
+# Word Count
+
+- **Main text**: [X,XXX] words
+- **Abstract**: [XXX] words
+- **Tables**: [X]
+- **Figures**: [X]
+
+<!--
+JIP word limit: 10,000 words maximum (excluding abstract, tables, references, and footnotes)
+-->
+
+# Keywords
+
+1. Broadband adoption
+2. Computer vision
+3. Rural-urban classification
+4. Digital divide
+5. Infrastructure policy
+
+---
+
+*This cover page should be submitted separately from the anonymous manuscript.*
