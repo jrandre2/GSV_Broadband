@@ -1,0 +1,13 @@
+% Left-align longtables in PDF output
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{\fill}
+
+% Prevent line-break artifacts in URLs/DOIs in the PDF bibliography.
+\makeatletter
+\AtBeginDocument{%
+  \@ifpackageloaded{hyperref}{\hypersetup{breaklinks=false}}{}%
+  \renewcommand{\url}[1]{\texttt{\detokenize{##1}}}%
+  \def\UrlBreaks{}%
+  \def\UrlBigBreaks{}%
+}
+\makeatother
