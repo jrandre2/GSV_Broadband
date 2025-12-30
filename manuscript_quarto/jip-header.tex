@@ -6,7 +6,7 @@
 \makeatletter
 \AtBeginDocument{%
   \@ifpackageloaded{hyperref}{\hypersetup{breaklinks=false}}{}%
-  \renewcommand{\url}[1]{\texttt{\detokenize{##1}}}%
+  \renewcommand{\url}[1]{\texttt{\detokenize{#1}}}%
   \def\UrlBreaks{}%
   \def\UrlBigBreaks{}%
 }
