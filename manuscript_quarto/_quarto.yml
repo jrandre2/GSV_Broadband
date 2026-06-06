@@ -2,23 +2,35 @@ project:
   type: manuscript
   output-dir: _output
 
-title: "What Predicts Broadband Usage? A Comparison of Computer Vision and Rural Urban Typology Machine Learning Models"
+title: "Predicting Broadband Usage: A Comparison of Computer Vision and Rural-Urban Typology Machine Learning Models"
 author:
-  - name: Jesse Andrews
-    affiliation: Texas Tech University
+  - name: Jesse R. Andrews
+    affiliation: "Center of Excellence in Capacity-building for Resilient Housing; Department of Civil, Environmental & Construction Engineering, Texas Tech University"
     email: jesse.andrews@ttu.edu
+  - name: Angela K. Hollman
+    affiliation: "Department of Cyber Systems, University of Nebraska Kearney"
+    email: hollmanak@unk.edu
+keywords:
+  - broadband
+  - computer vision
+  - machine learning
+  - rural-urban typology
+  - spatial cross-validation
 
 abstract: |
-  This study tests whether Google Street View (GSV) imagery improves prediction of broadband
-  usage (estimated percent accessing >=25/3 Mbps) beyond a rural-urban typology across 264 ZIP
-  codes (ZCTAs) in Nebraska. We extract 24 handcrafted OpenCV features from 7,619 GSV images and
-  compare RUCA-only, visual-only, and combined models. On a fixed 80/20 holdout split, tuned
-  RUCA-only models reach test $R^2$ around 0.40, tuned visual-only models reach about 0.37, and
-  combined models do not exceed the RUCA baseline. Spatial cross-validation with nested tuning
-  substantially lowers performance (best RUCA around 0.13; visual and combined near zero or
-  negative), indicating limited geographic generalization. These results suggest that for this
-  region and target, typology provides a strong, low-cost baseline for modeling broadband
-  usage, while imagery adds limited incremental value.
+  Effective broadband policy depends on accurate identification of underserved communities, yet
+  federal mapping data has historically suffered from coverage overestimation and latency. In
+  response, policymakers are increasingly exploring novel machine learning techniques to audit
+  coverage claims. This study evaluates the administrative utility of one such approach: using
+  street-level imagery and computer vision to predict broadband usage. We extract visual
+  features from 7,619 Google Street View images across 264 Nebraska ZCTAs and compare their
+  predictive power against a standard, low-cost administrative baseline: the USDA's
+  Rural-Urban Commuting Area (RUCA) codes.
+
+  We find that simple geographic typologies (RUCA) consistently outperform complex computer
+  vision models ($R^2$ = 0.40 vs. 0.37). Furthermore, spatial cross-validation reveals that both
+  approaches struggle to generalize to isolated geographic regions, suggesting that neither
+  method is suitable for cross-jurisdictional deployment without local recalibration.
 
 title-block-style: plain
 
@@ -40,6 +52,7 @@ format:
     sansfont: "Times New Roman"
     geometry:
       - margin=1in
+    include-in-header: jip-header.tex
     number-sections: true
     csl: csl/chicago-fullnote-bibliography.csl
     cite-method: citeproc
@@ -58,3 +71,4 @@ execute:
   message: false
 
 jupyter: python3
+notebook-links: false

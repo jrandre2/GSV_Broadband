@@ -45,8 +45,8 @@ class SpatialCVManager:
         n_groups : int
             Number of spatial groups for cross-validation.
         method : str
-            Grouping method: 'kmeans', 'geographic_bands', 'longitude_bands',
-            'spatial_blocks', 'zip_digit', 'contiguity_queen'.
+            Grouping method: 'kmeans', 'balanced_kmeans', 'geographic_bands',
+            'longitude_bands', 'spatial_blocks', 'zip_digit', 'contiguity_queen'.
         random_state : int
             Random seed for reproducibility.
         """
@@ -86,6 +86,9 @@ class SpatialCVManager:
             )
             self.spatial_groups = kmeans.fit_predict(coords)
 
+        elif self.method == 'balanced_kmeans':
+            self.spatial_groups = self._balanced_kmeans(coords)
+
         elif self.method == 'geographic_bands':
             # Create latitude-based bands
             quantiles = np.quantile(latitudes, np.linspace(0, 1, self.n_groups + 1))
@@ -116,6 +119,44 @@ class SpatialCVManager:
 
         self._print_group_summary()
         return self.spatial_groups
+
+    def _balanced_kmeans(self, coords: np.ndarray) -> np.ndarray:
+        """Assign k-means centers with balanced group sizes."""
+        kmeans = KMeans(
+            n_clusters=self.n_groups,
+            random_state=self.random_state,
+            n_init=10
+        )
+        kmeans.fit(coords)
+        centers = kmeans.cluster_centers_
+
+        n_samples = coords.shape[0]
+        base = n_samples // self.n_groups
+        remainder = n_samples % self.n_groups
+        capacities = [
+            base + 1 if idx < remainder else base
+            for idx in range(self.n_groups)
+        ]
+
+        expanded_centers = []
+        expanded_groups = []
+        for group_idx, cap in enumerate(capacities):
+            for _ in range(cap):
+                expanded_centers.append(centers[group_idx])
+                expanded_groups.append(group_idx)
+
+        expanded_centers = np.array(expanded_centers)
+        distances = np.linalg.norm(coords[:, None, :] - expanded_centers[None, :, :], axis=2)
+
+        try:
+            from scipy.optimize import linear_sum_assignment
+        except Exception as exc:
+            raise ImportError(f"scipy required for balanced_kmeans assignment: {exc}")
+
+        row_idx, col_idx = linear_sum_assignment(distances)
+        assignments = np.empty(n_samples, dtype=int)
+        assignments[row_idx] = np.array(expanded_groups)[col_idx]
+        return assignments
 
     def create_groups_from_zip_codes(
         self,

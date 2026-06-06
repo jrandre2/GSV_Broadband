@@ -16,6 +16,7 @@ Commands:
     estimate_robustness Run robustness checks (s04)
     make_figures        Generate publication figures (s05)
     validate_manuscript Validate manuscript (s06)
+    analysis_addons     Run supplemental analysis add-ons (s07)
     run_all             Run complete pipeline
 """
 
@@ -100,6 +101,12 @@ def main():
     p_ms.add_argument('--journal', default='default',
                       help='Journal configuration to use')
 
+    # Stage 07: Analysis add-ons
+    subparsers.add_parser(
+        'analysis_addons',
+        help='Run supplemental analyses (holdout ACS, coordinates, cap sensitivity)'
+    )
+
     # Run All
     p_all = subparsers.add_parser(
         'run_all',
@@ -154,6 +161,10 @@ def main():
         elif args.command == 'validate_manuscript':
             from src.stages import s06_manuscript
             return s06_manuscript.main(journal=args.journal)
+
+        elif args.command == 'analysis_addons':
+            from src.stages import s07_analysis_addons
+            return s07_analysis_addons.main()
 
         elif args.command == 'run_all':
             return run_full_pipeline(skip=args.skip)

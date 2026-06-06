@@ -26,7 +26,7 @@ from src.config import (
     OUTCOME_VAR, TREATMENT_VAR, VISUAL_FEATURE_NAMES,
     INFRASTRUCTURE_FEATURES, COLOR_FEATURES,
     VISUAL_REGULARIZATION, RUCA_REGULARIZATION,
-    SPATIAL_CV_N_GROUPS, REPEATED_CV_N_SPLITS, REPEATED_CV_N_REPEATS,
+    SPATIAL_CV_N_GROUPS, SPATIAL_GROUPING_METHOD, REPEATED_CV_N_SPLITS, REPEATED_CV_N_REPEATS,
     TUNING_INNER_FOLDS, TUNING_RIDGE_ALPHAS,
     TUNING_ENET_ALPHAS, TUNING_ENET_L1_RATIOS,
     TUNING_RF_PARAMS, TUNING_ET_PARAMS, TUNING_GB_PARAMS,
@@ -1283,7 +1283,13 @@ def main(compare_cv: bool = True, spatial_sensitivity: bool = False) -> int:
         if not input_path.exists():
             raise FileNotFoundError(f"Input not found: {input_path}. Run stage 02 first.")
         panel_df = load_parquet(input_path)
-        spatial_groups = panel_df['spatial_group'].values
+
+        if 'has_images' in panel_df.columns:
+            n_before = len(panel_df)
+            panel_df = panel_df[panel_df['has_images']].copy()
+            print(f"   Filtering to ZCTAs with imagery: {len(panel_df)} of {n_before}")
+
+        spatial_groups = _compute_spatial_groups(panel_df, SPATIAL_GROUPING_METHOD)
 
         all_results = []
 

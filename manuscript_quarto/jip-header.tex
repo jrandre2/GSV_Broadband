@@ -2,12 +2,11 @@
 \setlength{\LTleft}{0pt}
 \setlength{\LTright}{\fill}
 
-% Prevent line-break artifacts in URLs/DOIs in the PDF bibliography.
+% Allow URL/DOI line breaks while keeping the main font.
 \makeatletter
 \AtBeginDocument{%
-  \@ifpackageloaded{hyperref}{\hypersetup{breaklinks=false}}{}%
-  \renewcommand{\url}[1]{\texttt{\detokenize{#1}}}%
-  \def\UrlBreaks{}%
-  \def\UrlBigBreaks{}%
+  \@ifpackageloaded{hyperref}{\hypersetup{breaklinks=true}}{}%
+  \urlstyle{same}%
+  \renewcommand{\UrlFont}{\normalfont}%
 }
 \makeatother

@@ -28,6 +28,7 @@ from src.config import (
     LABELS_FILE, CONFERENCE_FEATURES_PATH, CONFERENCE_TEST_SIZE,
     CONFERENCE_SPLIT_SEED, ML_MODELS,
     TUNING_RF_PARAMS, TUNING_ET_PARAMS, TUNING_GB_PARAMS,
+    SPATIAL_GROUPING_METHOD, SPATIAL_CV_N_GROUPS,
 )
 from src.utils.helpers import load_parquet, save_csv, ensure_dir, get_timestamp
 from src.utils.spatial_cv import SpatialCVManager
@@ -56,6 +57,42 @@ def _get_one_hot_encoder() -> OneHotEncoder:
         return OneHotEncoder(handle_unknown='ignore', sparse_output=False)
     except TypeError:
         return OneHotEncoder(handle_unknown='ignore', sparse=False)
+
+
+def _compute_spatial_groups(df: pd.DataFrame) -> np.ndarray:
+    """Compute spatial groups using the configured method."""
+    manager = SpatialCVManager(n_groups=SPATIAL_CV_N_GROUPS, method=SPATIAL_GROUPING_METHOD)
+
+    if SPATIAL_GROUPING_METHOD == 'zip_digit':
+        return manager.create_groups_from_zip_codes(df['zip'])
+
+    if SPATIAL_GROUPING_METHOD in ('contiguity_queen', 'contiguity_rook'):
+        try:
+            import geopandas as gpd
+        except Exception as exc:
+            raise ImportError(f"geopandas required for contiguity grouping: {exc}")
+
+        shp_path = Path('tl_2022_us_zcta520.shp')
+        if not shp_path.exists():
+            raise FileNotFoundError(f"Shapefile not found: {shp_path}")
+
+        zcta_list = df['zip'].astype(str).str.zfill(5).tolist()
+        gdf = gpd.read_file(shp_path)
+        gdf['ZCTA5CE20'] = gdf['ZCTA5CE20'].astype(str).str.zfill(5)
+        gdf = gdf[gdf['ZCTA5CE20'].isin(zcta_list)]
+        if len(gdf) != len(zcta_list):
+            missing = set(zcta_list) - set(gdf['ZCTA5CE20'])
+            raise ValueError(f"Missing {len(missing)} ZCTAs in shapefile")
+        gdf = gdf.set_index('ZCTA5CE20').loc[zcta_list].reset_index()
+        contiguity = SPATIAL_GROUPING_METHOD.replace('contiguity_', '')
+        return manager.create_groups_from_geodata(gdf, contiguity=contiguity)
+
+    if 'latitude' not in df.columns or 'longitude' not in df.columns:
+        raise ValueError("Missing latitude/longitude for spatial grouping")
+    return manager.create_groups_from_coordinates(
+        df['latitude'].values,
+        df['longitude'].values,
+    )
 
 
 def get_specifications(df: pd.DataFrame) -> dict:
@@ -122,7 +159,7 @@ def _run_two_stage_cv(
     X_ruca = df[[TREATMENT_VAR]].values[valid_mask]
     X_visual = df[visual_features].fillna(0).values[valid_mask]
 
-    gkf = GroupKFold(n_splits=5)
+    gkf = GroupKFold(n_splits=SPATIAL_CV_N_GROUPS)
     scores = []
 
     for train_idx, test_idx in gkf.split(X_ruca, y, groups):
@@ -623,9 +660,6 @@ def main(models: list = None, run_all: bool = False, profile: str = 'default') -
         panel_df = load_parquet(input_path)
         print(f"   Loaded {len(panel_df)} records")
 
-        # Get spatial groups
-        spatial_groups = panel_df['spatial_group'].values
-
         # Get specifications with detected feature columns
         SPECIFICATIONS = get_specifications(panel_df)
         visual_features = get_visual_feature_cols(panel_df)
@@ -638,6 +672,26 @@ def main(models: list = None, run_all: bool = False, profile: str = 'default') -
             specs_to_run = [m for m in models if m in SPECIFICATIONS]
         else:
             specs_to_run = ['ruca_baseline', 'visual_only', 'combined']
+
+        # Align sample when visual features are part of the comparison
+        uses_visual = False
+        for spec_name in specs_to_run:
+            spec = SPECIFICATIONS.get(spec_name, {})
+            if spec.get('two_stage', False):
+                uses_visual = True
+                break
+            features = spec.get('features', [])
+            if any(f in visual_features for f in features):
+                uses_visual = True
+                break
+
+        if uses_visual and 'has_images' in panel_df.columns:
+            n_before = len(panel_df)
+            panel_df = panel_df[panel_df['has_images']].copy()
+            print(f"   Filtering to ZCTAs with imagery: {len(panel_df)} of {n_before}")
+
+        # Compute spatial groups for the current sample
+        spatial_groups = _compute_spatial_groups(panel_df)
 
         print(f"\n🤖 Running {len(specs_to_run)} model specifications...")
 

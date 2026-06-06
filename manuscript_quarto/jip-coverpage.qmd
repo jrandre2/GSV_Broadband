@@ -14,24 +14,24 @@ format:
 
 # Article Title
 
-**What Predicts Broadband Usage? Exploring Computer Vision and Rural-Urban Typology Machine Learning Models**
+**Predicting Broadband Usage: A Comparison of Computer Vision and Rural-Urban Typology Machine Learning Models**
 
 # Author Information
 
 ## Author 1 (Corresponding Author)
 
-- **Name**: [Full Name]
-- **Affiliation**: [Department], [Institution]
+- **Name**: Jesse R. Andrews
+- **Affiliation**: Center of Excellence in Capacity-building for Resilient Housing; Department of Civil, Environmental & Construction Engineering, Texas Tech University
 - **Address**: [Full Mailing Address]
-- **Email**: [email@institution.edu]
+- **Email**: jesse.andrews@ttu.edu
 - **ORCID**: [0000-0000-0000-0000]
 - **Phone**: [Phone Number]
 
-## Author 2 (if applicable)
+## Author 2
 
-- **Name**: [Full Name]
-- **Affiliation**: [Department], [Institution]
-- **Email**: [email@institution.edu]
+- **Name**: Angela K. Hollman
+- **Affiliation**: Department of Cyber Systems, University of Nebraska Kearney
+- **Email**: hollmanak@unk.edu
 - **ORCID**: [0000-0000-0000-0000]
 
 # Author Contributions
@@ -41,8 +41,8 @@ Use CRediT taxonomy if applicable:
 https://credit.niso.org/
 -->
 
-- **[Author 1]**: Conceptualization, Methodology, Software, Formal Analysis, Writing - Original Draft
-- **[Author 2]**: Supervision, Writing - Review & Editing
+- **Jesse R. Andrews**: Conceptualization, Methodology, Software, Formal Analysis, Writing - Original Draft
+- **Angela K. Hollman**: Supervision, Writing - Review & Editing
 
 # Acknowledgments
 

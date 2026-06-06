@@ -1,6 +1,6 @@
 # Peer Review Intake (SR-002)
 
-Status: Current.
+Status: Superseded by SR-004 (archived; not current).
 Review date: 2025-12-28.
 Source: Synthetic peer review provided by user; latest manuscript.
 Full text: doc/logs/peer_review_sr002.md.

@@ -85,13 +85,20 @@ def export_figures(figures_dir: Path, output_dir: Path):
     for ext in ['*.png', '*.jpg', '*.jpeg', '*.tiff', '*.tif']:
         figure_files.extend(figures_dir.glob(ext))
 
+    # Skip macOS metadata and hidden files.
+    figure_files = [
+        fig_path for fig_path in figure_files
+        if not fig_path.name.startswith('._') and not fig_path.name.startswith('.')
+    ]
+
     alt_text_entries = []
 
     for i, fig_path in enumerate(sorted(figure_files), 1):
         # Create standardized filename
         new_name = f"fig_{i:02d}_{fig_path.stem}{fig_path.suffix}"
         dest_path = output_dir / new_name
-        shutil.copy2(fig_path, dest_path)
+        # Copy only file contents to avoid macOS resource forks.
+        shutil.copyfile(fig_path, dest_path)
         print(f"Copied figure: {fig_path.name} -> {new_name}")
 
         # Add placeholder alt text entry

@@ -46,6 +46,13 @@ The pipeline is canonical. Use the diagnostics outputs for any reported metrics.
 - Visual-only spatial CV (cv_r2_mean): -0.196 to -0.173 across caps
 - RUCA baseline is unchanged (cv_r2_mean -0.010)
 
+## Analysis Add-ons (SR-004)
+
+- Output: data_work/diagnostics/analysis_addons/holdout_acs_baselines.csv, coordinate_baselines.csv, fold_diagnostics.csv, cap_sensitivity_summary.csv.
+- Holdout ACS subset (N=258): RUCA categorical R² 0.250; ACS-only 0.062; RUCA+ACS 0.127.
+- Coordinate baselines: holdout lat/long R² -0.068; spatial CV lat/long -1.306 ± 1.414; longitude-only spatial CV -0.815 ± 1.161.
+- Visual ridge cap sensitivity: holdout test R² 0.045-0.077; spatial CV mean -0.196 to -0.173 across caps.
+
 ## Conference Reproduction (enhanced_optimal_features_20251228_122633.csv)
 
 - Data source: data/processed/enhanced_optimal_features_20251228_122633.csv (261 ZIPs)

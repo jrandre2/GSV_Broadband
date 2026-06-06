@@ -100,6 +100,15 @@ For full methodological details, see `doc/METHODOLOGY.md`. The pipeline uses spa
 - `doc/logs/` stores legacy text dumps from pre-CENTAUR work.
 - `manuscript_quarto/` holds the working draft; treat the conference submission as the current draft of this paper and revise directly (no metacommentary).
 
+## Manuscript
+
+The latest rendered manuscript is at the repository root:
+
+- `manuscript.pdf` — current submission PDF
+- `manuscript.docx` — current Word document
+
+Source files and figures are in `manuscript_quarto/`. The `manuscript_quarto/_output/` directory is gitignored (large rendered assets); the root copies are the canonical published snapshots.
+
 ## Citation
 
 Manuscript drafts live in `manuscript_quarto/`. Use the finalized paper for citation.

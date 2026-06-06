@@ -191,6 +191,29 @@ python src/pipeline.py validate_manuscript --journal default
 
 ---
 
+### Stage 07: Analysis Add-ons (`s07_analysis_addons.py`)
+
+**Purpose**: Run supplemental analyses for peer review add-ons.
+
+**Inputs**:
+- `data_work/panel.parquet`
+- `data_work/data_linked.parquet`
+- `data_work/diagnostics/cap_sensitivity/*`
+
+**Outputs**:
+- `data_work/diagnostics/analysis_addons/holdout_acs_baselines.csv`
+- `data_work/diagnostics/analysis_addons/coordinate_baselines.csv`
+- `data_work/diagnostics/analysis_addons/fold_diagnostics.csv`
+- `data_work/diagnostics/analysis_addons/cap_sensitivity_holdout.csv`
+- `data_work/diagnostics/analysis_addons/cap_sensitivity_summary.csv`
+
+**Options**:
+```bash
+python src/pipeline.py analysis_addons
+```
+
+---
+
 ## Data Flow Diagram
 
 ```

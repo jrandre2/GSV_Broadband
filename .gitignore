@@ -83,6 +83,7 @@ htmlcov/
 manuscript_quarto/_output/
 manuscript_quarto/_freeze/
 manuscript_quarto/.quarto/
+manuscript_quarto/index_files/
 
 # =============================================================================
 # LOGS AND TEMP FILES
@@ -124,3 +125,8 @@ nebraska_streetview_manifest.json
 !.gitkeep
 !manuscript_quarto/figures/*.png
 !manuscript_quarto/figures/*.pdf
+
+# =============================================================================
+# ROOT MANUSCRIPT (latest rendered output)
+# =============================================================================
+# manuscript.docx and manuscript.pdf are tracked at root

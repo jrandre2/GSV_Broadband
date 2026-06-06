@@ -11,7 +11,7 @@
 #
 # Usage: quarto render jip-template.qmd --profile jip
 
-title: "What Predicts Broadband Usage? A Comparison of Computer Vision and Rural Urban Typology Machine Learning Models"
+title: "Predicting Broadband Usage: A Comparison of Computer Vision and Rural-Urban Typology Machine Learning Models"
 
 # Author information (for cover page - remove from anonymous version)
 # Comment out or delete this block for anonymous submission
@@ -25,14 +25,18 @@ author:
 # Alternative: 150-200 word abstract
 # Focus on: What policy question? What finding? What implication?
 abstract: |
-  This study asks whether Google Street View imagery improves prediction of broadband
-  usage (estimated percent accessing >=25/3 Mbps) beyond rural-urban typology across
-  264 Nebraska ZIP codes (ZCTAs). We extract handcrafted visual features and pretrained
-  CNN embeddings (no fine-tuning) from 7,619 images and compare RUCA-only, visual-only,
-  and combined models. On a fixed holdout split, tuned RUCA-only models reach test $R^2$
-  around 0.40, visual-only models reach about 0.37, and combined models do not exceed
-  the RUCA baseline. Spatial cross-validation substantially lowers performance,
-  indicating limited geographic generalization.
+  With tens of billions in federal broadband funding at stake, cost-effective ways to identify
+  underserved communities are critical. We evaluate whether street-level imagery improves
+  prediction of the Microsoft-estimated share achieving >=25/3 Mbps across 264 Nebraska ZCTAs.
+  We extract 24 OpenCV features from 7,619 Google Street View images and compare RUCA
+  typology, visual features, ACS indicators, and combined models. On a fixed 80/20 holdout
+  split, RUCA one-hot reaches R^2 = 0.40, visual models reach about 0.37, and combined models
+  do not improve. Spatial cross-validation yields near-zero or negative R^2 and modest ranking
+  (Spearman rho = 0.40), with strong sensitivity to fold design. Results indicate RUCA is a
+  strong within-region baseline, while cross-region deployment requires local validation and
+  transparent error reporting. The outcome is a usage proxy rather than availability, so
+  policy applications should treat outputs as screening signals and triangulate with local
+  evidence.
 
 keywords:
   - broadband

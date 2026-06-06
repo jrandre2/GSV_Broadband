@@ -1,6 +1,6 @@
 # Peer Review Response (SR-002)
 
-Status: Current.
+Status: Superseded by SR-004 (archived; not current).
 Review date: 2025-12-28.
 Source review: doc/logs/peer_review_sr002.md.
 Assessment basis: manuscript_quarto/index.qmd, doc/PIPELINE.md, src/stages/s02_panel.py, src/stages/s03_estimation.py, src/stages/s04_robustness.py, src/utils/feature_extraction.py, src/utils/spatial_cv.py, data_work/diagnostics/linkage_summary.csv, data_work/diagnostics/panel_summary.csv, data_work/diagnostics/pretrained_features/pretrained_features_20250728_233330.csv, data_work/diagnostics/cap_sensitivity/image_counts_summary.csv, data_work/diagnostics/cap_sensitivity/max_images_*/estimation_results.csv, data_work/diagnostics/cap_sensitivity/max_images_*/robustness_results.csv, data_work/diagnostics/conference/estimation_results.csv, data_work/diagnostics/robustness_results.csv, data_work/diagnostics/spatial_sensitivity/spatial_sensitivity_summary.csv.

@@ -116,10 +116,11 @@ VISUAL_FEATURE_NAMES: List[str] = INFRASTRUCTURE_FEATURES + COLOR_FEATURES
 # =============================================================================
 
 SPATIAL_CV_N_GROUPS = 5
-SPATIAL_GROUPING_METHOD = 'contiguity_queen'  # Options: 'kmeans', 'geographic_bands', 'longitude_bands', 'spatial_blocks', 'zip_digit', 'contiguity_queen'
+SPATIAL_GROUPING_METHOD = 'contiguity_queen'  # Options: 'kmeans', 'balanced_kmeans', 'geographic_bands', 'longitude_bands', 'spatial_blocks', 'zip_digit', 'contiguity_queen'
 SPATIAL_SENSITIVITY_METHODS = [
     'contiguity_queen',
     'kmeans',
+    'balanced_kmeans',
     'geographic_bands',
     'longitude_bands',
     'spatial_blocks',
